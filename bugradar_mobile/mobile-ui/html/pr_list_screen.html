@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar - Pull Requests</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3b83f7",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101722",
+                        "surface-dark": "#1b2433",
+                        "on-surface-dark": "#e1e3e6",
+                        "on-surface-secondary-dark": "#8899b3",
+                        "status-open": "#22c55e",
+                        "status-merged": "#a855f7",
+                        "status-review": "#f97316",
+                        "status-draft": "#64748b"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px 0 rgba(59, 131, 247, 0.5)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 0,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative mx-auto flex h-auto min-h-screen w-full max-w-md flex-col bg-background-light dark:bg-background-dark">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between bg-background-light/80 px-4 backdrop-blur-sm dark:bg-background-dark/80">
+<div class="flex size-10 shrink-0 items-center justify-start">
+<img alt="BugRadar App Logo" class="h-8 w-8" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcrn9WLYdxgGaRRhBeyfTXYbMikA8ibZfqWyLdikbeAt7sefgfVjHRtQnUe1FP7vn4LymgL7DTzuIg3E9CvBt7eNttpxbkzNw8_TQFLpAjfhd-ltlLw9Ta0x7tUCJBcszRg4S3dHoZWrCuR3eo6oppiHN7dGHcLMonu8TvlqD9oml0chLRnHYyknOP4V4gYXsPKSry0oPz58Q4GqAUWaXluXniTzNeQOSnIhgC7HfGTq4RvtiAfxt-aZdgzE5JyvEbtHKYe6hjNnBf"/>
+</div>
+<h1 class="font-display text-lg font-bold text-slate-800 dark:text-white">Pull Requests</h1>
+<div class="flex size-10 shrink-0 items-center justify-end">
+<button class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-slate-600 hover:bg-slate-200 dark:text-on-surface-secondary-dark dark:hover:bg-surface-dark">
+<span class="material-symbols-outlined text-2xl">notifications</span>
+</button>
+</div>
+</header>
+<!-- Search and Filters -->
+<div class="sticky top-16 z-10 bg-background-light/80 pt-2 backdrop-blur-sm dark:bg-background-dark/80">
+<!-- Search Bar -->
+<div class="px-4 pb-3">
+<label class="flex h-12 w-full flex-col">
+<div class="flex h-full w-full flex-1 items-stretch rounded-xl">
+<div class="flex items-center justify-center rounded-l-xl border border-r-0 border-slate-300 bg-slate-100 pl-4 text-slate-500 dark:border-surface-dark dark:bg-surface-dark dark:text-on-surface-secondary-dark">
+<span class="material-symbols-outlined text-2xl">search</span>
+</div>
+<input class="form-input h-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-xl border border-l-0 border-slate-300 bg-slate-100 px-4 text-base font-normal leading-normal text-slate-900 placeholder:text-slate-500 focus:outline-0 focus:ring-2 focus:ring-primary/50 dark:border-surface-dark dark:bg-surface-dark dark:text-on-surface-dark dark:placeholder:text-on-surface-secondary-dark dark:focus:ring-primary" placeholder="Search PRs..." value=""/>
+</div>
+</label>
+</div>
+<!-- Filter Chips -->
+<div class="flex w-full gap-2 overflow-x-auto px-4 pb-4">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary px-4 text-white shadow-glow">
+<p class="text-sm font-medium leading-normal">Open</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 px-4 dark:bg-surface-dark">
+<p class="text-sm font-medium leading-normal text-slate-700 dark:text-on-surface-secondary-dark">Needs My Review</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 px-4 dark:bg-surface-dark">
+<p class="text-sm font-medium leading-normal text-slate-700 dark:text-on-surface-secondary-dark">Draft</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 px-4 dark:bg-surface-dark">
+<p class="text-sm font-medium leading-normal text-slate-700 dark:text-on-surface-secondary-dark">Merged</p>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-200 px-4 dark:bg-surface-dark">
+<p class="text-sm font-medium leading-normal text-slate-700 dark:text-on-surface-secondary-dark">All</p>
+</button>
+</div>
+</div>
+<!-- PR List -->
+<main class="flex flex-1 flex-col gap-3 p-4 pt-0">
+<!-- PR Card 1 -->
+<div class="flex cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-lg dark:border-surface-dark dark:bg-surface-dark dark:hover:border-primary/50">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="flex size-8 items-center justify-center rounded-full bg-black text-white">
+<span class="material-symbols-outlined !text-[20px]">code</span>
+</div>
+<div class="rounded-full bg-status-open/10 px-2.5 py-0.5 text-xs font-semibold text-status-open">Open</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-secondary-dark">
+<span class="material-symbols-outlined !text-[16px]">chat_bubble_outline</span>
+<span>3</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<p class="font-medium text-slate-900 dark:text-on-surface-dark">FE-123: Implement new authentication flow</p>
+<p class="text-sm text-slate-600 dark:text-on-surface-secondary-dark">bugradar/webapp (feature/auth → main)</p>
+</div>
+</div>
+<!-- PR Card 2 -->
+<div class="flex cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-lg dark:border-surface-dark dark:bg-surface-dark dark:hover:border-primary/50">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="flex size-8 items-center justify-center rounded-full bg-[#FC6D26] p-1 text-white">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitLab</title><path d="M23.955 13.587l-1.34-4.124L18.488 1.35a.6.6 0 00-1.12.375l1.065 3.275H5.57l1.064-3.275a.6.6 0 00-1.12-.375L1.387 9.463.045 13.587a.45.45 0 00.165.55l11.79 8.768a.6.6 0 00.69 0l11.79-8.768a.45.45 0 00.165-.55z"></path></svg>
+</div>
+<div class="rounded-full bg-status-review/10 px-2.5 py-0.5 text-xs font-semibold text-status-review">Needs Review</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-secondary-dark">
+<span class="material-symbols-outlined !text-[16px]">chat_bubble_outline</span>
+<span>12</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<p class="font-medium text-slate-900 dark:text-on-surface-dark">BE-456: Optimize database query performance</p>
+<p class="text-sm text-slate-600 dark:text-on-surface-secondary-dark">bugradar/api (hotfix/db-perf → main)</p>
+</div>
+</div>
+<!-- PR Card 3 -->
+<div class="flex cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-lg dark:border-surface-dark dark:bg-surface-dark dark:hover:border-primary/50">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="flex size-8 items-center justify-center rounded-full bg-black text-white">
+<span class="material-symbols-outlined !text-[20px]">code</span>
+</div>
+<div class="rounded-full bg-status-merged/10 px-2.5 py-0.5 text-xs font-semibold text-status-merged">Merged</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-secondary-dark">
+<span class="material-symbols-outlined !text-[16px]">chat_bubble_outline</span>
+<span>7</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<p class="font-medium text-slate-900 dark:text-on-surface-dark">DS-789: Add new data processing pipeline</p>
+<p class="text-sm text-slate-600 dark:text-on-surface-secondary-dark">bugradar/data (feat/pipeline → prod)</p>
+</div>
+</div>
+<!-- PR Card 4 -->
+<div class="flex cursor-pointer flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 transition-all hover:shadow-lg dark:border-surface-dark dark:bg-surface-dark dark:hover:border-primary/50">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="flex size-8 items-center justify-center rounded-full bg-[#0052CC] p-1 text-white">
+<svg role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Bitbucket</title><path d="M22.502 14.156l-1.85-5.69a.46.46 0 00-.436-.31H3.784a.46.46 0 00-.436.31l-1.85 5.69a.458.458 0 00.18.544l10.02 6.035a.46.46 0 00.457 0l10.02-6.035a.458.458 0 00.18-.544zM8.943 12.8h6.115L12 6.2z"></path></svg>
+</div>
+<div class="rounded-full bg-status-draft/10 px-2.5 py-0.5 text-xs font-semibold text-status-draft">Draft</div>
+</div>
+<div class="flex items-center gap-2 text-sm text-on-surface-secondary-dark">
+<span class="material-symbols-outlined !text-[16px]">chat_bubble_outline</span>
+<span>0</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<p class="font-medium text-slate-900 dark:text-on-surface-dark">MOB-321: [WIP] Refactor settings screen UI</p>
+<p class="text-sm text-slate-600 dark:text-on-surface-secondary-dark">bugradar/mobile (refactor/settings → dev)</p>
+</div>
+</div>
+<!-- Empty State Example -->
+<div class="mt-8 flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-slate-300 bg-slate-100/50 p-8 text-center dark:border-surface-dark dark:bg-surface-dark/50">
+<span class="material-symbols-outlined text-5xl text-slate-400 dark:text-on-surface-secondary-dark">search_off</span>
+<h3 class="text-lg font-semibold text-slate-800 dark:text-on-surface-dark">No Pull Requests Found</h3>
+<p class="max-w-xs text-sm text-slate-600 dark:text-on-surface-secondary-dark">Try adjusting your search or filter to find what you're looking for.</p>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar - Issues</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3b83f7",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#101722",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-10 flex h-16 items-center border-b border-white/10 bg-background-light/[.85] px-4 dark:bg-background-dark/[.85]" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+<button class="flex h-12 w-12 items-center justify-center text-zinc-400 dark:text-zinc-500">
+<span class="material-symbols-outlined text-zinc-300">menu</span>
+</button>
+<h1 class="flex-1 text-lg font-bold leading-tight tracking-[-0.015em] text-zinc-900 dark:text-white">Issues</h1>
+<button class="flex h-12 w-12 items-center justify-center text-zinc-400 dark:text-zinc-500">
+<span class="material-symbols-outlined text-zinc-300">search</span>
+</button>
+</header>
+<!-- Tabs -->
+<div class="border-b border-white/10 px-4">
+<div class="flex justify-between">
+<a class="flex flex-1 flex-col items-center justify-center border-b-[3px] border-b-transparent py-4 text-zinc-400" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">All</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center border-b-[3px] border-b-primary py-4 text-white" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Bugs</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center border-b-[3px] border-b-transparent py-4 text-zinc-400" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Tasks</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center border-b-[3px] border-b-transparent py-4 text-zinc-400" href="#">
+<p class="text-sm font-bold leading-normal tracking-[0.015em]">Features</p>
+</a>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto p-4 pb-2 [&amp;::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-primary/20 pl-3 pr-4 ring-1 ring-inset ring-primary">
+<span class="material-symbols-outlined text-primary" style="font-size: 20px;">check</span>
+<p class="text-sm font-medium leading-normal text-primary">To Do</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-zinc-800 pl-3 pr-4 text-zinc-300">
+<p class="text-sm font-medium leading-normal">In Progress</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-zinc-800 pl-3 pr-4 text-zinc-300">
+<p class="text-sm font-medium leading-normal">In Review</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-zinc-800 pl-3 pr-4 text-zinc-300">
+<p class="text-sm font-medium leading-normal">Done</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-zinc-800 pl-3 pr-4 text-zinc-300">
+<p class="text-sm font-medium leading-normal">Blocked</p>
+</div>
+</div>
+<!-- Issue List -->
+<main class="flex flex-1 flex-col gap-3 p-4 pt-2">
+<!-- Issue Card 1 -->
+<div class="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 ring-1 ring-white/10">
+<div class="flex items-start justify-between">
+<p class="text-base font-medium leading-normal text-white">Fix login button alignment on Safari</p>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 ml-3 shrink-0" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDTLpnuayKFyChPUO-3VJeydmBcW_e8XSdf_rjF_XnColgIpZrasiXWS50onzx9JVPuAjCw0RO1gZS_JRj5L5PwB3Xq8I0yWB0MlUPHbv_bGEFHXpdyOsp5wCt6ztvuikoNlmYjLMEhLjUgTovMC0Ms-JAV52bynpGOGCvxN2vx6Bbn-vmy0RixjvP40HzGn4mjfq8EhWRuOde5cjxkDalxx0VBhkuEtT8LYgs5_6g1jfRcQwB4e62cQ2AimwoxfqXOHygCjrqxFBU");'></div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 rounded-full bg-red-500/20 px-2 py-0.5">
+<span class="material-symbols-outlined text-red-400" style="font-size: 14px;">arrow_upward</span>
+<p class="text-xs font-medium text-red-400">HIGH</p>
+</div>
+<p class="text-xs font-normal text-zinc-400">In Progress</p>
+</div>
+<div class="flex size-6 items-center justify-center rounded-md bg-zinc-800">
+<img class="h-4 w-4" data-alt="GitHub logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADHD9GyxqKVpsPfZxgn5_ZjoZp_KXaX4a9Dunm6oyNqFy87XAphzuORAlzIUbW6KeCqrApfFVIxoSkbzHgSofovxahnPqU5zT9fyCyd0CfXrNDqN5_pYjdjhTYRoMAu1mNB61yXKirW0Ei7DbfpjrnCS4FSWZZlG5epIVvI0N868nBls5AGE5Me9xKH28vKwSvtOVMmdzgAOSVlX8F0gPfC2fRXKFIrcQAhnecEWDz3altw8fJThydkqNA_8Ku7exjvsMtirVjCh5i" style="filter: invert(1);"/>
+</div>
+</div>
+</div>
+<!-- Issue Card 2 -->
+<div class="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 ring-1 ring-white/10">
+<div class="flex items-start justify-between">
+<p class="text-base font-medium leading-normal text-white">Implement new caching mechanism</p>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 ml-3 shrink-0" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBSTnQAqE5lxLZsEsP6IMfRimhtgHXhbM0FgyMlpvEeIEGeBj15VOglMMu2nJU8yXoEV7OpZxAfEoV53vZPUWkpy9qWf7wJkt7AmHZ_7wkKiLFjrvFnRasG-_Mb7LFHCAjnSpjj9zq-9vgj8YmE0eB5CQDnFtYuk_DNG5nS4TMlmVX62LdEPpYaiqoORzUA1s29aaIKCdCJlY2sPX2eb3RqLj0okPiC6rk-F8O5kJ93YUIFbyT-zgoaO20tDbSjI3TGhQgD2ltQ9O3Y");'></div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 rounded-full bg-yellow-500/20 px-2 py-0.5">
+<span class="material-symbols-outlined text-yellow-400" style="font-size: 14px;">horizontal_rule</span>
+<p class="text-xs font-medium text-yellow-400">MEDIUM</p>
+</div>
+<p class="text-xs font-normal text-zinc-400">To Do</p>
+</div>
+<div class="flex size-6 items-center justify-center rounded-md bg-zinc-800 p-0.5">
+<img class="h-full w-full" data-alt="Jira logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9KX9usA60xYhvBXEdSQ5tla4tt3QbrmbrF0a1TjGuj8u3qCBfQ31WtZmYBDbGPXtFgw2UYTWGe8LXphy8N5yIszHB0WAccNKfaZ-1YdXl0FKe271-QlOCsBvowy_nVJRM7um058v2qser_HD-nIs8tjmBuN51gfQV6T06lUIZ1n7CNw5HDyHofg_2MKvhC_jTg8vEMdHddtu1axHcFkZbWFjepDAlICQnJi_HGjoTwU2lOCqJEICbBXfT6684L4PuePyVZa9jk25I"/>
+</div>
+</div>
+</div>
+<!-- Issue Card 3 -->
+<div class="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 ring-1 ring-white/10">
+<div class="flex items-start justify-between">
+<p class="text-base font-medium leading-normal text-white">Design onboarding flow illustrations</p>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 ml-3 shrink-0" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCTr2J4U1KyM-H5bPfRdMLISLpq0gxCJxgJ8AVSNCGLA7oVesRY6-oDN3RPd2BgBSgXzZAleZIEeD5JB_-KnhAV_LUibA-I9YQGCDB6haL0tYMtkOyq9NbzE7At793bEXgf8cUX1pdUum9tRT-HNMAB-B2TCiRtaXpf69dZug2tI9qt82X9bYxBhA9EqcrUAIAEcK-dtw-7QDPCKwI-cF3ayaSw4qmettZms5gwkyFwYZXnNwBv4tj9iZKmkEn6yesu899JEjBydgAJ");'></div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 rounded-full bg-green-500/20 px-2 py-0.5">
+<span class="material-symbols-outlined text-green-400" style="font-size: 14px;">arrow_downward</span>
+<p class="text-xs font-medium text-green-400">LOW</p>
+</div>
+<p class="text-xs font-normal text-zinc-400">Done</p>
+</div>
+<div class="flex size-6 items-center justify-center rounded-md bg-zinc-800 p-0.5">
+<img class="h-full w-full" data-alt="GitLab logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVBe1RkHs2gYDawJqpYQCvnC0pJ3B5Hk2PaixeoyUaJI2UrZF68o8sOHmD2gYxCx0UOYd5Xp6JkZ2VuS_oXXm8nQ-YHwWbthmnvTuWOZvZ5CXMZ-YSMUrvLhS5xFpBg2QZDM2LGR-lJprjsjPGnipvpxRol3uiw5zepvpP1hy4J2h4TToB9eMvUKN32lBH15XTEpshd7T2rdmvNlDT54bIXph-LJAmYHKpu06sEv7JUtqLfXfoDhIA-2Idy591iafx3V2of6uMA1_R"/>
+</div>
+</div>
+</div>
+<!-- Issue Card 4 -->
+<div class="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 ring-1 ring-white/10">
+<div class="flex items-start justify-between">
+<p class="text-base font-medium leading-normal text-white">Refactor authentication service</p>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-8 w-8 ml-3 shrink-0" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC_7EoJNlw1Hi33VyYJC7Krl67NPATZMRSzgGXu0VU0v9RLfMxgtuHtn5ii0oAcTEVxJEh_L_ZdDF35DU-5j-GMdHM31DRanf2OFqHN6E5hX0pMX1d7z4eDPpVOjyZMzuy495bCMRB8mwaAUTVREbrPf08lanTW4w3WZEuyvsw9Khlv-GNOy9vrY1AHWamzJeSR0ZjGLLftSmlsxd8njLmsszX964Sk4Q8nMgoCbl4Zgjccl_TYRw4iU_OspGTCn0nDKnKwx8cqPhQq");'></div>
+</div>
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 rounded-full bg-yellow-500/20 px-2 py-0.5">
+<span class="material-symbols-outlined text-yellow-400" style="font-size: 14px;">horizontal_rule</span>
+<p class="text-xs font-medium text-yellow-400">MEDIUM</p>
+</div>
+<p class="text-xs font-normal text-zinc-400">In Review</p>
+</div>
+<div class="flex size-6 items-center justify-center rounded-md bg-zinc-800">
+<img class="h-4 w-4" data-alt="GitHub logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8P5zJHOLj8hAIppwvWXx7Nk074nr_t-r55XOKWl2oAb2Fs1747B7IGlLp59nOLrFLCJlCKJEkgOr-w6HGBZUCuRh45ua4cEx4YA9gPQaMW9UN9NwG21jNndSfVPjVLDl3451Q1DxQktH5iALfMAnZV-P7-2mLaLQTmsRfZKnT1jc1cmtBKX3RH0G6KKE5inyVL-xp95zIHXPKF8mA4D6JmhHgVkHqjfaNW7s0gR5TaFqaj09hns9Lq2CBa2B6DSuwx7M05g0h4dtk" style="filter: invert(1);"/>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
+<span class="material-symbols-outlined text-white" style="font-size: 28px;">add</span>
+</button>
+</div>
+</body></html>

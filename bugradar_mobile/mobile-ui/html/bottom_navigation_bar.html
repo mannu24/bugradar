@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar - Mobile UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3b83f7",
+              "background-light": "#f5f7f8",
+              "background-dark": "#101722",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .active .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative mx-auto flex h-screen max-w-sm flex-col justify-end overflow-hidden">
+<!-- This empty div is a placeholder for the main app content -->
+<div class="flex-grow"></div>
+<!-- Bottom Navigation Bar -->
+<div class="w-full bg-[#182334] px-2 pb-3 pt-2">
+<div class="flex items-center justify-around">
+<!-- Dashboard (Active) -->
+<a class="active flex w-1/5 flex-col items-center justify-center gap-1.5 py-1 text-primary" href="#">
+<div class="relative flex h-8 w-16 items-center justify-center">
+<div class="absolute inset-0 rounded-full bg-primary/20 blur-md"></div>
+<div class="relative flex h-8 w-16 items-center justify-center rounded-full bg-primary/30">
+<span class="material-symbols-outlined text-2xl text-primary">grid_view</span>
+</div>
+</div>
+<p class="text-xs font-semibold leading-normal text-primary">Dashboard</p>
+</a>
+<!-- Pull Requests -->
+<a class="flex w-1/5 flex-col items-center justify-center gap-1.5 py-1 text-[#8fa6cc] transition-colors duration-200 hover:text-primary/80" href="#">
+<div class="flex h-8 w-16 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">call_merge</span>
+</div>
+<p class="text-xs font-medium leading-normal">PRs</p>
+</a>
+<!-- Issues -->
+<a class="flex w-1/5 flex-col items-center justify-center gap-1.5 py-1 text-[#8fa6cc] transition-colors duration-200 hover:text-primary/80" href="#">
+<div class="flex h-8 w-16 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">bug_report</span>
+</div>
+<p class="text-xs font-medium leading-normal">Issues</p>
+</a>
+<!-- Reviews -->
+<a class="flex w-1/5 flex-col items-center justify-center gap-1.5 py-1 text-[#8fa6cc] transition-colors duration-200 hover:text-primary/80" href="#">
+<div class="flex h-8 w-16 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">rate_review</span>
+</div>
+<p class="text-xs font-medium leading-normal">Reviews</p>
+</a>
+<!-- Settings -->
+<a class="flex w-1/5 flex-col items-center justify-center gap-1.5 py-1 text-[#8fa6cc] transition-colors duration-200 hover:text-primary/80" href="#">
+<div class="flex h-8 w-16 items-center justify-center">
+<span class="material-symbols-outlined text-2xl">settings</span>
+</div>
+<p class="text-xs font-medium leading-normal">Settings</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

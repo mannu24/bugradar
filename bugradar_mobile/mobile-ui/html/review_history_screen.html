@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar - Review History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#3b83f7",
+            "background-light": "#f5f7f8",
+            "background-dark": "#101722",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          boxShadow: {
+            'glow-green': '0 0 15px 0 rgba(76, 175, 80, 0.4)',
+            'glow-red': '0 0 15px 0 rgba(244, 67, 54, 0.4)',
+            'glow-blue': '0 0 15px 0 rgba(33, 150, 243, 0.4)',
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-dark overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="flex items-center bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined text-white text-2xl">arrow_back</span>
+</div>
+<h1 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Review History</h1>
+<div class="flex size-12 shrink-0"></div> <!-- Spacer for centering title -->
+</header>
+<!-- Filter Chips -->
+<div class="flex gap-3 px-4 py-2 overflow-x-auto">
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-primary pl-4 pr-4">
+<p class="text-white text-sm font-medium leading-normal">Today</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#223149] pl-4 pr-4">
+<p class="text-white text-sm font-medium leading-normal">This Week</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#223149] pl-4 pr-4">
+<p class="text-white text-sm font-medium leading-normal">This Month</p>
+</div>
+<div class="flex h-8 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-[#223149] pl-4 pr-4">
+<p class="text-white text-sm font-medium leading-normal">All Time</p>
+</div>
+</div>
+<!-- Card List -->
+<main class="flex flex-col gap-4 p-4">
+<!-- Card 1: Approved -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-[#1E1E1E] p-4">
+<div class="flex w-full flex-col items-stretch justify-center gap-2">
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">BugRadar/mobile-app</p>
+<p class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Feat: Implement new caching layer</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<div class="flex flex-col gap-1">
+<p class="text-[#8fa6cc] text-base font-normal leading-normal">by jane_doe #1256</p>
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">Reviewed 2 hours ago</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#4CAF50] bg-opacity-20 px-4 shadow-glow-green">
+<p class="text-[#4CAF50] text-sm font-medium leading-normal">Approved</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2: Changes Requested -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-[#1E1E1E] p-4">
+<div class="flex w-full flex-col items-stretch justify-center gap-2">
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">BugRadar/backend-api</p>
+<p class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Fix: Resolve authentication bug</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<div class="flex flex-col gap-1">
+<p class="text-[#8fa6cc] text-base font-normal leading-normal">by john_smith #1248</p>
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">Reviewed yesterday</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#F44336] bg-opacity-20 px-4 shadow-glow-red">
+<p class="text-[#F44336] text-sm font-medium leading-normal">Changes Requested</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3: Commented -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-[#1E1E1E] p-4">
+<div class="flex w-full flex-col items-stretch justify-center gap-2">
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">BugRadar/documentation</p>
+<p class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Docs: Update API usage guide</p>
+<div class="flex items-center gap-3 justify-between mt-2">
+<div class="flex flex-col gap-1">
+<p class="text-[#8fa6cc] text-base font-normal leading-normal">by sarah_jones #1233</p>
+<p class="text-[#8fa6cc] text-sm font-normal leading-normal">Reviewed 3 days ago</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-full bg-[#2196F3] bg-opacity-20 px-4 shadow-glow-blue">
+<p class="text-[#2196F3] text-sm font-medium leading-normal">Commented</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Empty State Example (commented out) -->
+<!--
+      <div class="flex flex-col items-center justify-center text-center mt-16 p-8">
+        <span class="material-symbols-outlined text-5xl text-[#4A5568]">history_toggle_off</span>
+        <p class="text-white text-lg font-bold leading-tight tracking-[-0.015em] mt-4">No Reviews Found</p>
+        <p class="text-[#8fa6cc] text-base font-normal leading-normal mt-1">You haven't reviewed any pull requests in this timeframe.</p>
+      </div>
+      -->
+</main>
+</div>
+</body></html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3b83f7",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#1C1B1F",
+                        "surface-dark": "#2A292E",
+                        "on-surface-dark": "#E6E1E5",
+                        "on-surface-variant-dark": "#CAC4D0",
+                        "primary-container-dark": "#384464",
+                        "on-primary-container-dark": "#D8E2FF",
+                        "error-dark": "#F2B8B5",
+                        "on-error-dark": "#601410",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col">
+<!-- TopAppBar -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-white/10">
+<div class="flex size-10 items-center justify-center text-on-surface-dark">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h1 class="text-on-surface-dark text-xl font-bold leading-tight flex-1">Settings</h1>
+</header>
+<main class="flex-1 flex flex-col gap-6 p-4">
+<!-- ProfileHeader -->
+<section class="flex w-full flex-col gap-4 sm:flex-row sm:items-center">
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-20 w-20" data-alt="User avatar with a gradient background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAdiachafahdE5s4inE6xWyJbm3FWpoHLll3bGWBh9aBieGG1xV9gboTq_RrJVldM6BDcLW5xb0mODf1TZuYT9sGbZ8G2Ri5wAeCavfBQ3JKUui5iRxK1a0uXmY8m0UPCaTDSJZwljSnlAmpG0RuLiP1SlyDuk_j5ny4C4GQ7MYax2BP-gKCBqpgFUsKi9sPLRlrLAQqx56gsvFkXdNESn2iC8gFpxM8ihx8w6yGU-IZ3SMLPXggDjPzQNa9KEUiJnrKQy3qetE0s1H");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-on-surface-dark text-[22px] font-bold leading-tight">Alex Hartman</p>
+<p class="text-on-surface-variant-dark text-base font-normal leading-normal">alex.hartman@email.com</p>
+</div>
+</div>
+</section>
+<!-- Integrations Section -->
+<section class="flex flex-col gap-3">
+<h2 class="text-primary-container-dark dark:text-on-primary-container-dark text-sm font-bold tracking-wide px-4">INTEGRATIONS</h2>
+<div class="flex flex-col bg-surface-dark rounded-xl overflow-hidden">
+<!-- GitHub ListItem -->
+<div class="flex items-center gap-4 bg-inherit px-4 min-h-[56px] justify-between border-b border-white/10">
+<div class="flex items-center gap-4 flex-1">
+<div class="text-[#ffffff] flex items-center justify-center rounded-lg bg-[#333333] shrink-0 size-10">
+<svg class="size-6" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="currentColor"></path></svg>
+</div>
+<p class="text-on-surface-dark text-base font-normal leading-normal flex-1 truncate">GitHub - AlexH_Dev</p>
+</div>
+</div>
+<!-- GitLab ListItem -->
+<div class="flex items-center gap-4 bg-inherit px-4 min-h-[56px] justify-between border-b border-white/10">
+<div class="flex items-center gap-4 flex-1">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#FC6D26] shrink-0 size-10">
+<svg class="size-6" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitLab</title><path d="m23.955 13.57.01-.01-4.132-12.722a.53.53 0 0 0-.996 0L14.71 13.56h-5.42L5.164.838a.53.53 0 0 0-.996 0L0 13.56l.01.01a.494.494 0 0 0 .193.428l11.643 8.525a.25.25 0 0 0 .308 0l11.643-8.525a.494.494 0 0 0 .193-.428Z" fill="currentColor"></path></svg>
+</div>
+<p class="text-on-surface-dark text-base font-normal leading-normal flex-1 truncate">GitLab - Alex_Hartman</p>
+</div>
+</div>
+<!-- Bitbucket ListItem -->
+<div class="flex items-center gap-4 bg-inherit px-4 min-h-[56px] justify-between">
+<div class="flex items-center gap-4 flex-1">
+<div class="text-white flex items-center justify-center rounded-lg bg-[#0052CC] shrink-0 size-10">
+<svg class="size-6" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Bitbucket</title><path d="M2.572 2.981H21.43V22.5h-5.918l-6.22-6.219v6.219H2.572V2.981zM22.019 1.5H1.982C1.72 1.5.01 1.714.01 3.57v18.868c0 1.26.544 1.562 1.383 1.562h8.118V13.23l6.219 6.22h6.28V2.98c0-1.077-.7-1.48-1.98-1.48z" fill="currentColor"></path></svg>
+</div>
+<p class="text-on-surface-dark text-base font-normal leading-normal flex-1 truncate">Bitbucket - AHartman</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-2 mt-2">
+<button class="flex items-center justify-center gap-2 w-full bg-primary text-white font-bold py-3 px-4 rounded-full text-sm">
+<span class="material-symbols-outlined text-base">add</span>
+                        Add New Integration
+                    </button>
+<button class="flex items-center justify-center gap-2 w-full bg-primary/30 text-primary-container-dark dark:text-on-primary-container-dark font-bold py-3 px-4 rounded-full text-sm">
+<span class="material-symbols-outlined text-base">sync</span>
+                        Resync All
+                    </button>
+</div>
+</section>
+<!-- Notifications Section -->
+<section class="flex flex-col gap-3">
+<h2 class="text-primary-container-dark dark:text-on-primary-container-dark text-sm font-bold tracking-wide px-4">NOTIFICATIONS</h2>
+<div class="flex flex-col bg-surface-dark rounded-xl overflow-hidden divide-y divide-white/10">
+<!-- Notification Toggle Item -->
+<div class="flex items-center justify-between p-4 min-h-[56px]">
+<p class="text-on-surface-dark">New Pull Request Assigned</p>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Notification Toggle Item -->
+<div class="flex items-center justify-between p-4 min-h-[56px]">
+<p class="text-on-surface-dark">Code Review Request</p>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Notification Toggle Item -->
+<div class="flex items-center justify-between p-4 min-h-[56px]">
+<p class="text-on-surface-dark">New Issue Mention</p>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Notification Toggle Item -->
+<div class="flex items-center justify-between p-4 min-h-[56px]">
+<p class="text-on-surface-dark">Task Due Soon</p>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-primary/50 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Account Management Section -->
+<section class="flex flex-col gap-3 pt-4">
+<h2 class="text-primary-container-dark dark:text-on-primary-container-dark text-sm font-bold tracking-wide px-4">ACCOUNT</h2>
+<div class="flex flex-col bg-surface-dark rounded-xl overflow-hidden divide-y divide-white/10">
+<button class="w-full text-left p-4 text-on-surface-dark hover:bg-white/5 transition-colors">
+                        Log Out
+                    </button>
+<button class="w-full text-left p-4 text-error-dark hover:bg-error-dark/10 transition-colors">
+                        Delete Account
+                    </button>
+</div>
+</section>
+</main>
+</div>
+</body></html>

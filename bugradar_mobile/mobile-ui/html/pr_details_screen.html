@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PR Details - BugRadar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3b83f7",
+              "background-light": "#f5f7f8",
+              "background-dark": "#121212",
+              "surface-dark": "#1e1e1e",
+              "on-surface-dark": "#e3e3e3",
+              "on-surface-variant-dark": "#c4c7c5",
+              "outline-dark": "#444746",
+              "success": "#4CAF50",
+              "danger": "#F44336",
+              "info": "#2196F3",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col dark group/design-root overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10">
+<div class="flex size-12 shrink-0 items-center justify-start">
+<span class="material-symbols-outlined text-on-surface-dark">arrow_back</span>
+</div>
+<h2 class="text-on-surface-dark text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">#123 Improve Login Flow</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 bg-transparent text-on-surface-dark gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined text-on-surface-dark">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Profile Header -->
+<div class="flex p-4 @container">
+<div class="flex w-full flex-col gap-4">
+<div class="flex gap-4 items-center">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-16 w-16" data-alt="User avatar for Alex Doe" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBcsXz0nUNRcgNsMW6uhbOflC3YHvlhCzbMDwtxb658ALYQ60HOAEKxB1VSLUkQnjDKJDCvT8CfCF5GmhP6OS2GiIVltI0DbU2iFcb3k9zpA6yj4WtRlMCCGshM3z7bhmVmQVMbL2vcHcag1zr_xUUIFDyDq4yBQbV-G79lLIWjLLs6QSaqKHDcAm9wRtQx8iAMfzGtq3pZ5O4UYoWI6gl44i7N6hKX1sCMZUunQctYlBd597jU_E5i-JC7OZS-R2JLjUL0jaK-imgY");'></div>
+<div class="flex flex-col justify-center">
+<p class="text-on-surface-dark text-xl font-bold leading-tight tracking-[-0.015em]">Alex Doe</p>
+<p class="text-on-surface-variant-dark text-base font-normal leading-normal">opened this pull request</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Description List -->
+<div class="px-4 pb-4 grid grid-cols-[30%_1fr] gap-x-4 gap-y-3">
+<p class="text-on-surface-variant-dark text-sm font-normal leading-normal">Status</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-success text-base">check_circle</span>
+<p class="text-on-surface-dark text-sm font-medium leading-normal">Open</p>
+</div>
+<p class="text-on-surface-variant-dark text-sm font-normal leading-normal">Branches</p>
+<p class="text-on-surface-dark text-sm font-normal leading-normal truncate">feature/new-login-flow <span class="text-on-surface-variant-dark">-&gt;</span> main</p>
+</div>
+<!-- Tabs -->
+<div class="sticky top-[72px] bg-background-light dark:bg-background-dark z-10">
+<div class="flex border-b border-outline-dark px-4 justify-between">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-primary pb-[13px] pt-4 flex-1" href="#">
+<p class="text-primary text-sm font-bold leading-normal">Overview</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-on-surface-variant-dark pb-[13px] pt-4 flex-1" href="#">
+<p class="text-on-surface-variant-dark text-sm font-bold leading-normal">Commits</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-on-surface-variant-dark pb-[13px] pt-4 flex-1" href="#">
+<p class="text-on-surface-variant-dark text-sm font-bold leading-normal">Reviews</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-b-transparent text-on-surface-variant-dark pb-[13px] pt-4 flex-1" href="#">
+<p class="text-on-surface-variant-dark text-sm font-bold leading-normal">Comments</p>
+</a>
+</div>
+</div>
+<!-- Tab Content: Overview -->
+<div class="p-4 flex flex-col gap-6">
+<!-- PR Description Card -->
+<div class="flex flex-col items-stretch justify-start rounded-xl bg-surface-dark">
+<div class="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-2 p-4">
+<p class="text-on-surface-variant-dark text-sm font-normal leading-normal">Description</p>
+<p class="text-on-surface-dark text-base font-normal leading-relaxed">
+                        This PR introduces a new authentication service and refactors the UI to be more intuitive for new users. It also includes updated documentation and unit tests for better long-term maintenance.
+                    </p>
+</div>
+</div>
+<!-- Reviewers List -->
+<div>
+<p class="text-on-surface-dark text-lg font-bold leading-tight tracking-[-0.015em] mb-3">Reviewers</p>
+<div class="flex flex-col gap-3">
+<!-- Reviewer Item: Approved -->
+<div class="flex items-center gap-4">
+<img class="h-10 w-10 rounded-full object-cover" data-alt="User avatar for Jane Smith" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQ32v_kQQ9iRSVZxi55WXyLmuypf3mmJs1vN4SiNfAqa___uk4fihuxDpxhmNl8y3JJCzz2vUe2exopdhJI_vwsa1B5icBkDj7sgnJNhmzfmPU1hZQPX0SVua9I4rWgCECzMB2PjA1z035fUBK4ouUUtjzQS9mT4CFuxSvX31UuPgQpvMvnzKUaZxX3KFspO793ggCRbWDQV7vZBq-VPK_UsJVaxwLu2VFTtHZibEoauUXW-BpgHphlqt4x0eFX-WC_tP0lBY3wiqJ"/>
+<div class="flex-1">
+<p class="text-on-surface-dark font-medium">Jane Smith</p>
+</div>
+<div class="flex items-center gap-2 text-success">
+<span class="material-symbols-outlined text-lg">verified</span>
+<p class="text-sm font-medium">Approved</p>
+</div>
+</div>
+<!-- Reviewer Item: Changes Requested -->
+<div class="flex items-center gap-4">
+<img class="h-10 w-10 rounded-full object-cover" data-alt="User avatar for Mike Johnson" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1VwsQUvh_54pfmbg5xS5lwTIDeAlNHFBB0JUhV_xIA2rkrQA16md81Hy2AjjV5rMTUlHxozQy3OHHtETjUqw_fzaqF2genL1geS_rWK3uXynyWlxZFh5B-Bhu97JCovbADnEis-sv4p3iyGN07OP-aScaY4729ZTM7vRiwa1pEmdw4Ey4izJLwAyfHXm7fcXyzOS_wu1Lu-3ZVdmSWSMx7QRBbxBhRDDIPH02O0HjwGaLnTVtBZpynjo4h29-kmw-Z4nFfXm-DrwK"/>
+<div class="flex-1">
+<p class="text-on-surface-dark font-medium">Mike Johnson</p>
+</div>
+<div class="flex items-center gap-2 text-danger">
+<span class="material-symbols-outlined text-lg">sms_failed</span>
+<p class="text-sm font-medium">Changes Requested</p>
+</div>
+</div>
+<!-- Reviewer Item: Pending -->
+<div class="flex items-center gap-4">
+<img class="h-10 w-10 rounded-full object-cover" data-alt="User avatar for Sarah Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDUral-KSAt4dVBg1maoUgodR9qmOgXD7ApfnrWV-bGS153anEUUliMkY2Ht6bpj2x5Whdh7WBuK-qzOHeRukvElH3RoJ0ARLVUdKOnq-LOf_jJBXJDnR1EFYSsYZSZFkiqsUHL4BKmhagqikIOT7dxRXrUtaluAtMmgSDqcFsLMriOeik-ZbxLSxIdUQqKNpE7-Ccx5SlSg5sWe_GpTxgJpNMTAEBffAjOKQzcHLXoEGUbn4VIBZJKlj63gEZnPrJpFFx0PnNXGNh"/>
+<div class="flex-1">
+<p class="text-on-surface-dark font-medium">Sarah Chen</p>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant-dark">
+<span class="material-symbols-outlined text-lg">pending</span>
+<p class="text-sm font-medium">Pending</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="p-4 pt-8 mt-auto flex items-center justify-between gap-2 bg-gradient-to-t from-background-dark to-transparent sticky bottom-0">
+<button class="flex-1 flex items-center justify-center h-12 rounded-full bg-success text-white text-sm font-bold gap-2">
+<span class="material-symbols-outlined">check</span>
+                Approve
+            </button>
+<button class="flex-1 flex items-center justify-center h-12 rounded-full bg-danger text-white text-sm font-bold gap-2">
+<span class="material-symbols-outlined">close</span>
+                Request Changes
+            </button>
+<button class="flex items-center justify-center h-12 w-12 rounded-full bg-info text-white">
+<span class="material-symbols-outlined">comment</span>
+</button>
+</div>
+</div>
+</body></html>

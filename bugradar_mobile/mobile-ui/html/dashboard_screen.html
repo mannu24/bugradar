@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BugRadar Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#3b83f7",
+            "background-light": "#f5f7f8",
+            "background-dark": "#101722",
+            // Custom colors from the user request
+            "surface-dark": "#1C1C20",
+            "divider-dark": "#2C2C30",
+            "text-primary-dark": "#E0E0E0",
+            "text-secondary-dark": "#9E9E9E",
+            "accent-indigo": "#8C9EFF",
+            "accent-cyan": "#64FFDA",
+            "accent-purple": "#B388FF",
+            "accent-orange": "#FFAB40",
+            "neon-pink": "#FF4081",
+            "electric-blue": "#40C4FF",
+            "bright-green": "#76FF03",
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-surface-dark dark group/design-root overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex items-center bg-surface-dark p-4 pb-3 justify-between sticky top-0 z-10 border-b border-divider-dark">
+<div class="flex size-10 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-text-primary-dark text-3xl">bug_report</span>
+</div>
+<h1 class="text-text-primary-dark text-xl font-bold leading-tight tracking-[-0.015em] flex-1 text-center">BugRadar</h1>
+<div class="flex w-20 items-center justify-end gap-2">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-transparent text-text-primary-dark text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined">search</span>
+</button>
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 w-10 bg-transparent text-text-primary-dark text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col p-4 space-y-6">
+<!-- Overview Cards -->
+<div class="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4">
+<div class="flex flex-1 gap-3 rounded-xl bg-surface-dark border border-divider-dark p-4 flex-col shadow-lg">
+<span class="material-symbols-outlined text-accent-indigo text-3xl">rebase</span>
+<div class="flex flex-col gap-1 mt-2">
+<h2 class="text-text-primary-dark text-2xl font-bold leading-tight">14</h2>
+<p class="text-text-secondary-dark text-sm font-normal leading-normal">Total Open PRs</p>
+</div>
+</div>
+<div class="flex flex-1 gap-3 rounded-xl bg-surface-dark border border-divider-dark p-4 flex-col shadow-lg">
+<span class="material-symbols-outlined text-accent-cyan text-3xl">task_alt</span>
+<div class="flex flex-col gap-1 mt-2">
+<h2 class="text-text-primary-dark text-2xl font-bold leading-tight">8</h2>
+<p class="text-text-secondary-dark text-sm font-normal leading-normal">Assigned Issues</p>
+</div>
+</div>
+<div class="flex flex-1 gap-3 rounded-xl bg-surface-dark border border-divider-dark p-4 flex-col shadow-lg">
+<span class="material-symbols-outlined text-accent-purple text-3xl">rate_review</span>
+<div class="flex flex-col gap-1 mt-2">
+<h2 class="text-text-primary-dark text-2xl font-bold leading-tight">5</h2>
+<p class="text-text-secondary-dark text-sm font-normal leading-normal">Pending Reviews</p>
+</div>
+</div>
+<div class="flex flex-1 gap-3 rounded-xl bg-surface-dark border border-divider-dark p-4 flex-col shadow-lg">
+<span class="material-symbols-outlined text-accent-orange text-3xl">update</span>
+<div class="flex flex-col gap-1 mt-2">
+<h2 class="text-text-primary-dark text-2xl font-bold leading-tight">22</h2>
+<p class="text-text-secondary-dark text-sm font-normal leading-normal">Updates Today</p>
+</div>
+</div>
+</div>
+<!-- Quick Stats Section -->
+<div>
+<h3 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] py-2">Quick Stats</h3>
+<div class="flex flex-col gap-4 mt-2">
+<!-- PRs by Platform Chart -->
+<div class="flex flex-col gap-4 rounded-xl bg-surface-dark border border-divider-dark p-4 shadow-lg">
+<p class="text-text-primary-dark text-base font-medium leading-normal">PRs by Platform</p>
+<div class="flex items-center justify-center gap-6">
+<div class="relative flex items-center justify-center w-36 h-36">
+<svg class="w-full h-full" viewbox="0 0 36 36">
+<path class="stroke-divider-dark" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3"></path>
+<path class="stroke-electric-blue" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="60, 100" stroke-linecap="round" stroke-width="3"></path>
+<path class="stroke-neon-pink" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-dasharray="30, 100" stroke-dashoffset="-60" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-text-primary-dark text-2xl font-bold">14</span>
+<span class="text-text-secondary-dark text-xs">Total</span>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-electric-blue"></div>
+<span class="text-text-secondary-dark text-sm">GitHub</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-neon-pink"></div>
+<span class="text-text-secondary-dark text-sm">GitLab</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-divider-dark"></div>
+<span class="text-text-secondary-dark text-sm">Bitbucket</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Issues by Status Chart -->
+<div class="flex flex-col gap-4 rounded-xl bg-surface-dark border border-divider-dark p-4 shadow-lg">
+<p class="text-text-primary-dark text-base font-medium leading-normal">Issues by Status</p>
+<div class="grid h-40 grid-flow-col gap-6 grid-rows-[1fr_auto] items-end justify-items-center px-3 pt-4">
+<div class="flex flex-col items-center justify-end w-full h-full gap-2">
+<div class="bg-neon-pink w-4/5 rounded-t" style="height: 60%;"></div>
+<p class="text-text-secondary-dark text-xs font-medium leading-normal">To Do</p>
+</div>
+<div class="flex flex-col items-center justify-end w-full h-full gap-2">
+<div class="bg-electric-blue w-4/5 rounded-t" style="height: 90%;"></div>
+<p class="text-text-secondary-dark text-xs font-medium leading-normal">In Prog</p>
+</div>
+<div class="flex flex-col items-center justify-end w-full h-full gap-2">
+<div class="bg-bright-green w-4/5 rounded-t" style="height: 40%;"></div>
+<p class="text-text-secondary-dark text-xs font-medium leading-normal">Done</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Activity Section -->
+<div>
+<h3 class="text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em] pt-4 pb-2">Recent Activity</h3>
+<div class="flex flex-col">
+<!-- List Item 1 -->
+<div class="flex items-center gap-4 py-4 border-b border-divider-dark">
+<div class="flex items-center justify-center size-10 rounded-full bg-[#28282D]">
+<img class="w-6 h-6" data-alt="GitHub logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTSNvQujHlQknoQYVXvdOVKuiiTM_beD8LjS_ISi5A-WTTwYQzHLwkD8t17s2MNhRJEvqy8sZ0sTwUac_zZMmQLcGo0S8dLoHHLo9RMy1nD6tMTUZhPNUIglMciWUxKmrYQMh4gB4B_qurgtYvvhrrNe5U-q_tIpEyRN3DKuPd1MPysjSXwRNqmdBoq3SIa1pCt48TJlCLyDIsK82zW1exIV_nmDIJUpqkEIFM5UoT2lNhSuz-FEcEfBjzeEC7XAA8ZS3pzb3tnbue"/>
+</div>
+<div class="flex-1">
+<p class="text-text-primary-dark text-base font-medium leading-tight">Fix: Critical bug in payment gateway</p>
+<p class="text-text-secondary-dark text-sm">bugradar/mobile-app</p>
+</div>
+<div class="flex items-center justify-center rounded-full bg-neon-pink/20 px-3 py-1">
+<p class="text-neon-pink text-xs font-bold">Open</p>
+</div>
+</div>
+<!-- List Item 2 -->
+<div class="flex items-center gap-4 py-4 border-b border-divider-dark">
+<div class="flex items-center justify-center size-10 rounded-full bg-[#28282D]">
+<img class="w-6 h-6" data-alt="GitLab logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI5loLkqyGLBFOvDi30op-CjicYuZlfseWKWVBR_zXbyDSpQiWuSKWaVtvp6z7xpVDBWMlD_aKcbnFH4ZWi9fTBItXOxdeQLDD_UHpRgxP8m4RNiCLCpfKT1sVVUY49_GyHws5d4QHllXn7rzlSRMzbrbbKE4TjkXSA9rPefkAHAhXIzK8Xkor7CjP0isbEfdi1-KfAnNvdInvDhlStrMQCmsDYQPhiHD_0CtttRyzm9EyhnTa9XPaHPOmxS3rZrDaCt86dIhOxVjd"/>
+</div>
+<div class="flex-1">
+<p class="text-text-primary-dark text-base font-medium leading-tight">Feat: Implement new dashboard widgets</p>
+<p class="text-text-secondary-dark text-sm">bugradar/webapp</p>
+</div>
+<div class="flex items-center justify-center rounded-full bg-electric-blue/20 px-3 py-1">
+<p class="text-electric-blue text-xs font-bold">In Review</p>
+</div>
+</div>
+<!-- List Item 3 -->
+<div class="flex items-center gap-4 py-4 border-b border-divider-dark">
+<div class="flex items-center justify-center size-10 rounded-full bg-[#28282D]">
+<img class="w-6 h-6" data-alt="GitHub logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn4i06xplaz8mXOd1aTf5tsu24eD-pC0n89_mQfXmqFsMMEmrUoZpjMqV8rA44IWRJld8d_2qrm4vJBd4BCjX5AxZkUVAKevSpmZLPS8NuP6DhmROb7ASjs0HCb7e8pRy3rugPysM9ixjCiLpyFrsph2mUP_7lobmyB-aDjx0aIcOGKUuzi-MaQ-t2sYLhWyu1liqol3MFpQF1MCZHgxdmDBt_zGsqFFcHJlKvoncjkbFibcERPVWKzsqi9XtI5tP6-tIqK-bJiIRd"/>
+</div>
+<div class="flex-1">
+<p class="text-text-primary-dark text-base font-medium leading-tight">Docs: Update contribution guidelines</p>
+<p class="text-text-secondary-dark text-sm">bugradar/docs</p>
+</div>
+<div class="flex items-center justify-center rounded-full bg-bright-green/20 px-3 py-1">
+<p class="text-bright-green text-xs font-bold">Merged</p>
+</div>
+</div>
+<!-- List Item 4 -->
+<div class="flex items-center gap-4 py-4">
+<div class="flex items-center justify-center size-10 rounded-full bg-[#28282D]">
+<img class="w-6 h-6" data-alt="Bitbucket logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvi-iUpfK6EVTJrU7W3IgzpPCyCcCdW7JhhdDAlepA6Jx5jhaIK_WLfZh5MLM0X1gm-wwjwArlSi3a0d1CPpQ961g2gh64hGj1yj4HyATv4nVU4gc85qTDf2nAEys9ThMLkgjXBg1L7m8kYP5ZaPS1F67fj_prLJWMJj94-2qmwI3qUrfEsGtSVn6nDWagmamP9U9Dxcjnsb9ehogK5Iwi1QfQzdaQvmg_tzXPzTYTpyqW2BpQ_HXcKBhfE5TiCKCG6ESFybypKcQn"/>
+</div>
+<div class="flex-1">
+<p class="text-text-primary-dark text-base font-medium leading-tight">Chore: Upgrade backend dependencies</p>
+<p class="text-text-secondary-dark text-sm">bugradar/api-service</p>
+</div>
+<div class="flex items-center justify-center rounded-full bg-neon-pink/20 px-3 py-1">
+<p class="text-neon-pink text-xs font-bold">Open</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>
