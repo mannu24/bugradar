@@ -1,21 +1,21 @@
+import 'dart:io';
+
 class AppConfig {
-  const AppConfig._();
+  // Your machine's local IP address
+  static const String _machineIp = '192.168.1.3';
+  static const int _port = 8006;
 
-  /// Update this via --dart-define=API_BASE_URL="https://api.example.com"
-  static const String apiBaseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:8000');
-
-  static const String appScheme = 'bugradar';
-  static const String authHost = 'auth';
-
-  static String get authRedirectUri => '$appScheme://$authHost';
-
-  static Uri oauthUrl(String provider) {
-    final redirectParam = Uri.encodeComponent(authRedirectUri);
-    final normalizedBase = apiBaseUrl.endsWith('/')
-        ? apiBaseUrl.substring(0, apiBaseUrl.length - 1)
-        : apiBaseUrl;
-    return Uri.parse('$normalizedBase/api/auth/$provider?redirect_url=$redirectParam');
+  // API Base URL (for API calls from the app)
+  static String get apiBaseUrl {
+    // Use machine IP for all platforms when testing on physical device
+    return 'http://$_machineIp:$_port/api';
   }
-}
 
+  // Backend Base URL (for OAuth browser redirects)
+  static String get backendBaseUrl {
+    return 'http://$_machineIp:$_port';
+  }
+
+  // OAuth Deep Link Scheme
+  static const String deepLinkScheme = 'bugradar';
+}

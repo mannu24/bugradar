@@ -33,8 +33,15 @@ class AuthController extends Controller
             $socialiteUser = Socialite::driver('google')->user();
             $user = $this->oauthService->findOrCreateUser('google', $socialiteUser);
 
-            // Create API token
-            $token = $user->createToken('auth-token')->plainTextToken;
+            // Log user into session for browser-based testing
+            Auth::login($user);
+
+            // Create API token with expiration (30 days)
+            $token = $user->createToken(
+                'mobile-app',
+                ['*'],
+                now()->addDays(30)
+            )->plainTextToken;
 
             // Check if mobile app wants deep link redirect
             $redirectUrl = $request->get('redirect_url');
@@ -47,6 +54,8 @@ class AuthController extends Controller
                 'success' => true,
                 'user' => $user,
                 'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_in' => 30 * 24 * 60 * 60, // 30 days in seconds
             ]);
         } catch (\Exception $e) {
             $redirectUrl = $request->get('redirect_url');
@@ -80,8 +89,12 @@ class AuthController extends Controller
             $socialiteUser = Socialite::driver('github')->user();
             $user = $this->oauthService->findOrCreateUser('github', $socialiteUser);
 
-            // Create API token
-            $token = $user->createToken('auth-token')->plainTextToken;
+            // Create API token with expiration (30 days)
+            $token = $user->createToken(
+                'mobile-app',
+                ['*'],
+                now()->addDays(30)
+            )->plainTextToken;
 
             // Check if mobile app wants deep link redirect
             $redirectUrl = $request->get('redirect_url');
@@ -94,6 +107,7 @@ class AuthController extends Controller
                 'success' => true,
                 'user' => $user,
                 'token' => $token,
+                'expires_in' => 30 * 24 * 60 * 60, // 30 days in seconds
             ]);
         } catch (\Exception $e) {
             $redirectUrl = $request->get('redirect_url');

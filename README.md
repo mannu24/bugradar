@@ -1,59 +1,386 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# BugRadar - Developer Issue Tracking Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive platform for tracking pull requests, issues, and code reviews across GitHub, GitLab, and Bitbucket.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 🔐 **OAuth Authentication** - Google and GitHub OAuth integration
+- 🔄 **Multi-Platform Sync** - Sync data from GitHub, GitLab, and Bitbucket
+- 📊 **Dashboard** - View statistics and recent activity
+- 🔍 **Advanced Filtering** - Filter by status, repository, priority, and more
+- 📱 **Mobile App** - Flutter mobile application (in `bugradar_mobile/`)
+- 🔔 **Background Sync** - Automatic data synchronization via queue workers
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Backend
+- **Framework:** Laravel 11
+- **Database:** MySQL
+- **Authentication:** Laravel Sanctum (Token-based API)
+- **Queue:** Database queue driver
+- **PHP:** 8.4+
 
-## Learning Laravel
+### Mobile
+- **Framework:** Flutter
+- **State Management:** Riverpod
+- **HTTP Client:** Dio
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Quick Start
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
+- PHP 8.4+
+- Composer
+- MySQL 8.0+
+- Node.js & NPM (for asset compilation)
 
-## Laravel Sponsors
+### Installation
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd bugradar
+```
 
-### Premium Partners
+2. **Install dependencies**
+```bash
+composer install
+npm install
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+4. **Configure database**
+Edit `.env` file:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bugradar
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+5. **Run migrations**
+```bash
+php artisan migrate
+```
+
+6. **Configure OAuth**
+Add your OAuth credentials to `.env`:
+```env
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:8006/api/auth/google/callback
+
+# GitHub OAuth
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
+GITHUB_REDIRECT_URI=http://localhost:8006/api/auth/github/callback
+```
+
+7. **Start the server**
+```bash
+php artisan serve --port=8006
+```
+
+8. **Start queue worker** (for background sync)
+```bash
+php artisan queue:work
+```
+
+## API Documentation
+
+### Authentication
+
+#### Google OAuth Login
+```
+GET /api/auth/google
+```
+Redirects to Google OAuth. After successful login, returns user info and API token.
+
+#### Get User Info
+```
+GET /api/auth/user
+Authorization: Bearer {token}
+```
+
+#### Logout
+```
+POST /api/auth/logout
+Authorization: Bearer {token}
+```
+
+### Integrations
+
+#### List Integrations
+```
+GET /api/integrations
+Authorization: Bearer {token}
+```
+
+#### Connect GitHub
+```
+GET /api/integrations/github/connect?token={token}
+```
+
+#### Connect GitLab
+```
+GET /api/integrations/gitlab/connect?token={token}
+```
+
+#### Connect Bitbucket
+```
+GET /api/integrations/bitbucket/connect?token={token}
+```
+
+#### Disconnect Integration
+```
+DELETE /api/integrations/{id}
+Authorization: Bearer {token}
+```
+
+#### Trigger Sync
+```
+POST /api/integrations/{id}/sync
+Authorization: Bearer {token}
+```
+
+### Pull Requests
+
+#### List Pull Requests
+```
+GET /api/pull-requests
+Authorization: Bearer {token}
+
+Query Parameters:
+- status: open|closed|merged
+- repository: owner/repo
+- platform: github|gitlab|bitbucket
+- per_page: 20 (default)
+- page: 1 (default)
+```
+
+#### Get PR Details
+```
+GET /api/pull-requests/{id}
+Authorization: Bearer {token}
+```
+
+#### Get Reviewed PRs
+```
+GET /api/pull-requests/reviewed
+Authorization: Bearer {token}
+```
+
+### Issues
+
+#### List Issues
+```
+GET /api/issues
+Authorization: Bearer {token}
+
+Query Parameters:
+- status: open|closed
+- type: bug|feature|task
+- priority: low|medium|high|critical
+- repository: owner/repo
+- per_page: 20 (default)
+```
+
+#### Get Issue Details
+```
+GET /api/issues/{id}
+Authorization: Bearer {token}
+```
+
+#### Get Bugs Only
+```
+GET /api/issues/bugs
+Authorization: Bearer {token}
+```
+
+#### Get Tasks Only
+```
+GET /api/issues/tasks
+Authorization: Bearer {token}
+```
+
+### Reviews
+
+#### List Reviews
+```
+GET /api/reviews
+Authorization: Bearer {token}
+
+Query Parameters:
+- status: approved|changes_requested|commented
+- per_page: 20 (default)
+```
+
+#### Get Review Details
+```
+GET /api/reviews/{id}
+Authorization: Bearer {token}
+```
+
+#### Get Review Statistics
+```
+GET /api/reviews/stats
+Authorization: Bearer {token}
+```
+
+### Dashboard
+
+#### Get Statistics
+```
+GET /api/dashboard/stats
+Authorization: Bearer {token}
+```
+
+Returns:
+- Open PRs count
+- Assigned issues count
+- Total reviews count
+- PRs by platform
+- Issues by status
+- Issues by priority
+
+#### Get Recent Activity
+```
+GET /api/dashboard/recent
+Authorization: Bearer {token}
+```
+
+Returns:
+- Recent PRs (last 10)
+- Recent issues (last 10)
+- Recent reviews (last 10)
+
+## Database Schema
+
+### Users
+- id, name, email, email_verified_at, password, remember_token, timestamps
+
+### OAuth Providers
+- id, user_id, provider, provider_user_id, access_token, refresh_token, expires_at, timestamps
+
+### Integrations
+- id, user_id, platform, platform_user_id, username, email, avatar, access_token, refresh_token, expires_at, is_active, last_synced_at, timestamps
+
+### Pull Requests
+- id, integration_id, platform, platform_pr_id, repository, title, description, state, author_username, author_avatar, branch_from, branch_to, commits_count, additions, deletions, comments_count, review_status, labels, created_at_platform, updated_at_platform, merged_at, timestamps
+
+### Issues
+- id, integration_id, platform, platform_issue_id, repository, title, description, type, state, priority, author_username, author_avatar, assignees, labels, comments_count, due_date, created_at_platform, updated_at_platform, closed_at, timestamps
+
+### Reviews
+- id, pull_request_id, platform, platform_review_id, reviewer_username, reviewer_avatar, state, body, submitted_at, timestamps
+
+### Sync Logs
+- id, integration_id, sync_type, status, prs_synced, issues_synced, reviews_synced, error_message, started_at, completed_at, timestamps
+
+## Postman Collection
+
+Import the Postman collection for easy API testing:
+- Collection: `postman/BugRadar-API.postman_collection.json`
+- Environment (Local): `postman/BugRadar-Local.postman_environment.json`
+- Environment (Production): `postman/BugRadar-Production.postman_environment.json`
+
+See `postman/README.md` for detailed instructions.
+
+## Mobile App
+
+The Flutter mobile app is located in `bugradar_mobile/` directory.
+
+### Setup
+```bash
+cd bugradar_mobile
+flutter pub get
+```
+
+### Configure API URL
+Edit `lib/config/app_config.dart`:
+```dart
+static const String baseUrl = 'http://localhost:8006/api';
+```
+
+### Run
+```bash
+flutter run
+```
+
+## Development
+
+### Queue Worker
+For background sync to work, keep the queue worker running:
+```bash
+php artisan queue:work
+```
+
+### Clear Cache
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+```
+
+### Run Tests
+```bash
+php artisan test
+```
+
+## Deployment
+
+See `DEPLOYMENT_GUIDE.md` for detailed deployment instructions.
+
+## OAuth Setup
+
+See `OAUTH_SETUP_GUIDE.md` for detailed OAuth configuration instructions for:
+- Google OAuth
+- GitHub OAuth
+- GitLab OAuth
+- Bitbucket OAuth
+
+## API Documentation
+
+See `API_DOCUMENTATION.md` for complete API reference with examples.
+
+## Project Structure
+
+```
+bugradar/
+├── app/
+│   ├── Http/Controllers/     # API Controllers
+│   ├── Jobs/                 # Background Jobs
+│   ├── Models/               # Eloquent Models
+│   └── Services/             # External API Services
+├── database/
+│   └── migrations/           # Database Migrations
+├── routes/
+│   ├── api.php              # API Routes
+│   └── web.php              # Web Routes
+├── bugradar_mobile/         # Flutter Mobile App
+├── postman/                 # Postman Collection
+└── public/                  # Public Assets
+```
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License.
+
+## Support
+
+For issues and questions, please open an issue on GitHub.

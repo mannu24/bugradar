@@ -53,6 +53,19 @@ class LoginScreen extends ConsumerWidget {
                 label: const Text('Continue with GitHub'),
               ),
               const SizedBox(height: 24),
+              // Development bypass (remove in production)
+              if (const bool.fromEnvironment('dart.vm.product') == false) ...[
+                const Divider(),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => notifier.devLogin(),
+                  child: const Text(
+                    '🔧 Dev Login (Skip OAuth)',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               Text(
                 'You will be redirected to your browser for secure OAuth login.',
                 style: Theme.of(context).textTheme.bodyMedium,

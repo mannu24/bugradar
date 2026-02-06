@@ -47,4 +47,17 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI'),
     ],
 
+    'gitlab' => [
+        'client_id' => env('GITLAB_CLIENT_ID'),
+        'client_secret' => env('GITLAB_CLIENT_SECRET'),
+        'redirect' => env('GITLAB_REDIRECT_URI'),
+        'instance_url' => env('GITLAB_INSTANCE_URL', 'https://gitlab.com/api/v4'),
+    ],
+
+    'bitbucket' => [
+        'client_id' => env('BITBUCKET_CLIENT_ID'),
+        'client_secret' => env('BITBUCKET_CLIENT_SECRET'),
+        'redirect' => env('BITBUCKET_REDIRECT_URI'),
+    ],
+
 ];

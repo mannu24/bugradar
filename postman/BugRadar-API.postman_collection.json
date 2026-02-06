@@ -1,0 +1,622 @@
+{
+  "info": {
+    "name": "BugRadar API",
+    "description": "Complete API collection for BugRadar - A unified dashboard for managing pull requests, issues, and reviews across GitHub, GitLab, and Bitbucket.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Google OAuth - Redirect",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/google",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google"]
+            },
+            "description": "Redirects to Google OAuth consent screen. Open this URL in a browser."
+          }
+        },
+        {
+          "name": "GitHub OAuth - Redirect",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/github",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "github"]
+            },
+            "description": "Redirects to GitHub OAuth consent screen. Open this URL in a browser."
+          }
+        },
+        {
+          "name": "Dev Login (Local Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.token) {",
+                  "        pm.environment.set('auth_token', jsonData.token);",
+                  "        console.log('Token saved to environment');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/dev-login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "dev-login"]
+            },
+            "description": "Development-only endpoint to get a test token. Only works in local environment."
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/user",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "user"]
+            },
+            "description": "Returns the authenticated user's information."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Revokes the current authentication token."
+          }
+        }
+      ],
+      "description": "Authentication endpoints for user login and OAuth flows."
+    },
+    {
+      "name": "Integrations",
+      "item": [
+        {
+          "name": "List All Integrations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations"]
+            },
+            "description": "Returns all connected platform integrations for the authenticated user."
+          }
+        },
+        {
+          "name": "Connect GitHub",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/github/connect",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "github", "connect"]
+            },
+            "description": "Initiates GitHub OAuth flow for integration. Open this URL in a browser."
+          }
+        },
+        {
+          "name": "Connect GitLab",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/gitlab/connect",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "gitlab", "connect"]
+            },
+            "description": "Initiates GitLab OAuth flow for integration. Open this URL in a browser."
+          }
+        },
+        {
+          "name": "Connect Bitbucket",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/bitbucket/connect",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "bitbucket", "connect"]
+            },
+            "description": "Initiates Bitbucket OAuth flow for integration. Open this URL in a browser."
+          }
+        },
+        {
+          "name": "Disconnect Integration",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}"]
+            },
+            "description": "Disconnects and removes an integration. Replace {{integration_id}} with actual ID."
+          }
+        },
+        {
+          "name": "Sync Integration",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}/sync",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}", "sync"]
+            },
+            "description": "Manually triggers a sync for the specified integration."
+          }
+        }
+      ],
+      "description": "Endpoints for managing platform integrations (GitHub, GitLab, Bitbucket)."
+    },
+    {
+      "name": "Pull Requests",
+      "item": [
+        {
+          "name": "List Pull Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?per_page=20&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [
+                {
+                  "key": "platform",
+                  "value": "github",
+                  "description": "Filter by platform (github, gitlab, bitbucket)",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "open",
+                  "description": "Filter by status (open, closed, merged)",
+                  "disabled": true
+                },
+                {
+                  "key": "repository",
+                  "value": "owner/repo",
+                  "description": "Filter by repository name",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at",
+                  "description": "Sort field (created_at, updated_at, title)",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc",
+                  "description": "Sort order (asc, desc)",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "20",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                }
+              ]
+            },
+            "description": "Returns all pull requests from connected integrations with optional filters."
+          }
+        },
+        {
+          "name": "List Pull Requests - Filtered by Platform",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?platform=github&status=open",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [
+                {
+                  "key": "platform",
+                  "value": "github"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                }
+              ]
+            },
+            "description": "Example: Get only open GitHub pull requests."
+          }
+        },
+        {
+          "name": "Get Pull Request Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests/{{pr_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests", "{{pr_id}}"]
+            },
+            "description": "Returns detailed information about a specific pull request."
+          }
+        },
+        {
+          "name": "Get Reviewed Pull Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests/reviewed?per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests", "reviewed"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Returns pull requests that the user has reviewed."
+          }
+        }
+      ],
+      "description": "Endpoints for managing and viewing pull requests across all platforms."
+    },
+    {
+      "name": "Issues",
+      "item": [
+        {
+          "name": "List Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/issues?per_page=20&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "platform",
+                  "value": "github",
+                  "description": "Filter by platform",
+                  "disabled": true
+                },
+                {
+                  "key": "type",
+                  "value": "bug",
+                  "description": "Filter by type (bug, feature, task)",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "open",
+                  "description": "Filter by status (open, closed, in_progress)",
+                  "disabled": true
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "description": "Filter by priority (low, medium, high, critical)",
+                  "disabled": true
+                },
+                {
+                  "key": "repository",
+                  "value": "owner/repo",
+                  "description": "Filter by repository",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "created_at",
+                  "description": "Sort field",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc",
+                  "description": "Sort order",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Returns all issues from connected integrations with optional filters."
+          }
+        },
+        {
+          "name": "List Issues - High Priority Bugs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/issues?type=bug&priority=high&status=open",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "bug"
+                },
+                {
+                  "key": "priority",
+                  "value": "high"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                }
+              ]
+            },
+            "description": "Example: Get only open high-priority bugs."
+          }
+        },
+        {
+          "name": "Get Issue Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "{{issue_id}}"]
+            },
+            "description": "Returns detailed information about a specific issue."
+          }
+        },
+        {
+          "name": "Get Bug Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/issues/bugs?per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "bugs"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Returns only bug-type issues."
+          }
+        },
+        {
+          "name": "Get Task Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/issues/tasks?per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "tasks"],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Returns only task-type issues."
+          }
+        }
+      ],
+      "description": "Endpoints for managing and viewing issues across all platforms."
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "List Reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?per_page=20&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [
+                {
+                  "key": "platform",
+                  "value": "github",
+                  "description": "Filter by platform",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "approved",
+                  "description": "Filter by status (approved, changes_requested, commented)",
+                  "disabled": true
+                },
+                {
+                  "key": "from_date",
+                  "value": "2024-01-01",
+                  "description": "Filter from date (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "to_date",
+                  "value": "2024-12-31",
+                  "description": "Filter to date (YYYY-MM-DD)",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "reviewed_at",
+                  "description": "Sort field",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_order",
+                  "value": "desc",
+                  "description": "Sort order",
+                  "disabled": true
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Returns all reviews by the authenticated user with optional filters."
+          }
+        },
+        {
+          "name": "List Reviews - This Month",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?from_date={{current_month_start}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [
+                {
+                  "key": "from_date",
+                  "value": "{{current_month_start}}"
+                }
+              ]
+            },
+            "description": "Example: Get reviews from this month."
+          }
+        },
+        {
+          "name": "Get Review Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/{{review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "{{review_id}}"]
+            },
+            "description": "Returns detailed information about a specific review."
+          }
+        },
+        {
+          "name": "Get Review Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "stats"]
+            },
+            "description": "Returns review statistics for the authenticated user."
+          }
+        }
+      ],
+      "description": "Endpoints for viewing review history and statistics."
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "stats"]
+            },
+            "description": "Returns overview statistics for the dashboard including PRs, issues, reviews, and integrations."
+          }
+        },
+        {
+          "name": "Get Recent Activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dashboard/recent?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "dashboard", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items to return"
+                }
+              ]
+            },
+            "description": "Returns recent activity across all integrations."
+          }
+        }
+      ],
+      "description": "Dashboard endpoints for overview statistics and recent activity."
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8006",
+      "type": "string"
+    }
+  ]
+}

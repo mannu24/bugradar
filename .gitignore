@@ -22,3 +22,12 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Test and temporary files
+test-*.php
+test-*.sh
+manual-sync.php
+*-testing.sh
+*-test.sh
+verify-*.sh
+quick-*.sh

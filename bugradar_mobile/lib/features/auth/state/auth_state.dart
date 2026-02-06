@@ -1,35 +1,29 @@
 import '../../../models/user.dart';
 
 class AuthState {
+  final bool isAuthenticated;
   final bool isLoading;
   final User? user;
-  final String? token;
   final String? error;
 
   const AuthState({
-    required this.isLoading,
+    this.isAuthenticated = false,
+    this.isLoading = false,
     this.user,
-    this.token,
     this.error,
   });
 
-  factory AuthState.initial() => const AuthState(isLoading: true);
-
-  bool get isAuthenticated => user != null && token != null;
-
   AuthState copyWith({
+    bool? isAuthenticated,
     bool? isLoading,
     User? user,
-    String? token,
     String? error,
-    bool clearError = false,
   }) {
     return AuthState(
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isLoading: isLoading ?? this.isLoading,
       user: user ?? this.user,
-      token: token ?? this.token,
-      error: clearError ? null : (error ?? this.error),
+      error: error,
     );
   }
 }
-
