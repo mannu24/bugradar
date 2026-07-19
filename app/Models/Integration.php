@@ -21,6 +21,14 @@ class Integration extends Model
         'last_synced_at',
     ];
 
+    /**
+     * Fields to hide from JSON/array output (never expose tokens to API consumers).
+     */
+    protected $hidden = [
+        'access_token',
+        'refresh_token',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -60,6 +68,14 @@ class Integration extends Model
     public function syncLogs()
     {
         return $this->hasMany(SyncLog::class);
+    }
+
+    /**
+     * Get the tracked repositories for the integration.
+     */
+    public function trackedRepositories()
+    {
+        return $this->hasMany(TrackedRepository::class);
     }
 
     /**

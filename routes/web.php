@@ -20,14 +20,13 @@ Route::get('/api/auth/google/callback', [AuthController::class, 'handleGoogleCal
 Route::get('/api/auth/github', [AuthController::class, 'redirectToGithub']);
 Route::get('/api/auth/github/callback', [AuthController::class, 'handleGithubCallback']);
 
-// Integration OAuth Routes (use web middleware for session-based auth)
-Route::middleware('web')->group(function () {
-    Route::get('/api/integrations/github/connect', [IntegrationController::class, 'connectGithub']);
-    Route::get('/api/integrations/gitlab/connect', [IntegrationController::class, 'connectGitlab']);
-    Route::get('/api/integrations/bitbucket/connect', [IntegrationController::class, 'connectBitbucket']);
-});
+// Integration OAuth connect routes
+// GitHub reuses the login OAuth app — its callback is /api/auth/github/callback
+// above, which routes login vs integration internally via the signed state param.
+Route::get('/api/integrations/github/connect', [IntegrationController::class, 'connectGithub']);
+Route::get('/api/integrations/gitlab/connect', [IntegrationController::class, 'connectGitlab']);
+Route::get('/api/integrations/bitbucket/connect', [IntegrationController::class, 'connectBitbucket']);
 
-// Integration OAuth Callbacks (need sessions)
-Route::get('/api/integrations/github/callback', [IntegrationController::class, 'handleGithubCallback']);
+// Integration OAuth Callbacks for GitLab & Bitbucket (need sessions)
 Route::get('/api/integrations/gitlab/callback', [IntegrationController::class, 'handleGitlabCallback']);
 Route::get('/api/integrations/bitbucket/callback', [IntegrationController::class, 'handleBitbucketCallback']);

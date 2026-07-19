@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('integration_id')->constrained()->onDelete('cascade');
             $table->string('sync_type'); // 'full', 'incremental'
-            $table->string('status'); // 'success', 'failed', 'partial'
+            $table->string('status'); // 'running', 'success', 'failed', 'partial'
             $table->integer('prs_synced')->default(0);
             $table->integer('issues_synced')->default(0);
             $table->integer('reviews_synced')->default(0);

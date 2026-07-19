@@ -42,9 +42,9 @@ return [
     ],
 
     'github' => [
-        'client_id' => env('GITHUB_CLIENT_ID'),
+        'client_id'     => env('GITHUB_CLIENT_ID'),
         'client_secret' => env('GITHUB_CLIENT_SECRET'),
-        'redirect' => env('GITHUB_REDIRECT_URI'),
+        'redirect'      => env('GITHUB_REDIRECT_URI'),
     ],
 
     'gitlab' => [
@@ -58,6 +58,12 @@ return [
         'client_id' => env('BITBUCKET_CLIENT_ID'),
         'client_secret' => env('BITBUCKET_CLIENT_SECRET'),
         'redirect' => env('BITBUCKET_REDIRECT_URI'),
+    ],
+
+    // Firebase Cloud Messaging (push notifications)
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS'), // absolute path to service-account JSON
+        'project_id'  => env('FCM_PROJECT_ID'),
     ],
 
 ];

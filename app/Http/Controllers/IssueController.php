@@ -79,10 +79,16 @@ class IssueController extends Controller
             $q->where('user_id', $request->user()->id);
         })->where('type', 'bug');
 
-        // Sorting
-        $sortBy = $request->get('sort_by', 'priority');
+        // Sorting — default to updated_at; priority needs FIELD() for correct ordering
+        $sortBy = $request->get('sort_by', 'updated_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
+
+        if ($sortBy === 'priority') {
+            // Order by priority: critical → high → medium → low
+            $query->orderByRaw("FIELD(priority, 'critical', 'high', 'medium', 'low') ASC");
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
         $issues = $query->with('integration')->paginate(20);
 

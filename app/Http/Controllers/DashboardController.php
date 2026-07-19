@@ -32,8 +32,10 @@ class DashboardController extends Controller
         // Note: metadata column not available yet, so we'll skip this for now
         $pendingReviews = 0;
 
-        // Total reviews done
-        $totalReviews = Review::count();
+        // Total reviews done (scoped to current user)
+        $totalReviews = Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->count();
 
         // PRs by platform
         $prsByPlatform = PullRequest::whereHas('integration', function ($q) use ($userId) {
@@ -101,12 +103,12 @@ class DashboardController extends Controller
         ->limit(10)
         ->get();
 
-        // Recent reviews (last 10)
-        $recentReviews = Review::whereHas('integration', function ($q) use ($userId) {
+        // Recent reviews (last 10) — scope through pullRequest → integration
+        $recentReviews = Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
             $q->where('user_id', $userId);
         })
-        ->with('integration')
-        ->orderBy('reviewed_at', 'desc')
+        ->with('pullRequest.integration')
+        ->orderBy('submitted_at', 'desc')
         ->limit(10)
         ->get();
 

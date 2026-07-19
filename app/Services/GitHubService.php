@@ -123,22 +123,76 @@ class GitHubService
     }
 
     /**
-     * Make authenticated request to GitHub API.
+     * Create a webhook on a repository.
+     *
+     * @return string  The created hook's ID.
+     * @throws \Exception on failure (e.g. no admin permission on the repo).
+     */
+    public function createWebhook(
+        Integration $integration,
+        string $owner,
+        string $repo,
+        string $callbackUrl,
+        string $secret,
+        array $events = ['pull_request', 'issues', 'pull_request_review']
+    ): string {
+        $response = Http::withHeaders($this->headers($integration))
+            ->post(self::API_BASE . "/repos/{$owner}/{$repo}/hooks", [
+                'name'   => 'web',
+                'active' => true,
+                'events' => $events,
+                'config' => [
+                    'url'          => $callbackUrl,
+                    'content_type' => 'json',
+                    'secret'       => $secret,
+                    'insecure_ssl' => '0',
+                ],
+            ]);
+
+        if ($response->failed()) {
+            throw new \Exception("GitHub webhook creation failed: {$response->body()}");
+        }
+
+        return (string) $response->json()['id'];
+    }
+
+    /**
+     * Delete a webhook from a repository. Failures are swallowed by the caller.
+     */
+    public function deleteWebhook(Integration $integration, string $owner, string $repo, string $hookId): void
+    {
+        $response = Http::withHeaders($this->headers($integration))
+            ->delete(self::API_BASE . "/repos/{$owner}/{$repo}/hooks/{$hookId}");
+
+        if ($response->failed()) {
+            throw new \Exception("GitHub webhook deletion failed: {$response->body()}");
+        }
+    }
+
+    /**
+     * Make authenticated GET request to GitHub API.
      */
     private function makeRequest(Integration $integration, string $endpoint, array $params = []): \Illuminate\Http\Client\Response
     {
-        $token = decrypt($integration->access_token);
-
-        $response = Http::withHeaders([
-            'Authorization' => "Bearer {$token}",
-            'Accept' => 'application/vnd.github.v3+json',
-            'User-Agent' => 'BugRadar-App',
-        ])->get(self::API_BASE . $endpoint, $params);
+        $response = Http::withHeaders($this->headers($integration))
+            ->get(self::API_BASE . $endpoint, $params);
 
         if ($response->failed()) {
             throw new \Exception("GitHub API request failed: {$response->body()}");
         }
 
         return $response;
+    }
+
+    /**
+     * Standard auth headers. access_token is already decrypted by the model mutator.
+     */
+    private function headers(Integration $integration): array
+    {
+        return [
+            'Authorization' => "Bearer {$integration->access_token}",
+            'Accept'        => 'application/vnd.github.v3+json',
+            'User-Agent'    => 'BugRadar-App',
+        ];
     }
 }

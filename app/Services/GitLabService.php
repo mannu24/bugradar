@@ -91,6 +91,60 @@ class GitLabService
         return $this->makeRequest('GET', "/projects/{$projectId}");
     }
 
+    // -------------------------------------------------------------------------
+    // Webhooks
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create a webhook on a project.
+     * GitLab uses a plaintext `token` header for verification (not HMAC).
+     *
+     * @return string  The created hook's ID.
+     * @throws \Exception on failure.
+     */
+    public function createWebhook(
+        int|string $projectId,
+        string $callbackUrl,
+        string $secret,
+        array $events = ['merge_requests_events', 'issues_events', 'note_events']
+    ): string {
+        $payload = [
+            'url'                 => $callbackUrl,
+            'token'               => $secret,
+            'enable_ssl_verification' => true,
+            'push_events'         => false,
+        ];
+        foreach ($events as $event) {
+            $payload[$event] = true;
+        }
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->accessToken,
+            'Accept'        => 'application/json',
+        ])->post($this->baseUrl . "/projects/{$projectId}/hooks", $payload);
+
+        if ($response->failed()) {
+            throw new \Exception("GitLab webhook creation failed: {$response->body()}");
+        }
+
+        return (string) $response->json()['id'];
+    }
+
+    /**
+     * Delete a webhook from a project.
+     */
+    public function deleteWebhook(int|string $projectId, string $hookId): void
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->accessToken,
+            'Accept'        => 'application/json',
+        ])->delete($this->baseUrl . "/projects/{$projectId}/hooks/{$hookId}");
+
+        if ($response->failed()) {
+            throw new \Exception("GitLab webhook deletion failed: {$response->body()}");
+        }
+    }
+
     /**
      * Make HTTP request to GitLab API
      */

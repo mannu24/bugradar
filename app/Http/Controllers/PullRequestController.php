@@ -67,10 +67,15 @@ class PullRequestController extends Controller
      */
     public function reviewed(Request $request): JsonResponse
     {
-        $query = PullRequest::whereHas('reviews', function ($q) use ($request) {
-            $q->whereHas('integration', function ($q2) use ($request) {
-                $q2->where('user_id', $request->user()->id);
+        $userId = $request->user()->id;
+
+        $query = PullRequest::whereHas('reviews', function ($q) use ($userId) {
+            // Filter: reviews exist where the PR's integration belongs to this user
+            $q->whereHas('pullRequest.integration', function ($q2) use ($userId) {
+                $q2->where('user_id', $userId);
             });
+        })->whereHas('integration', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
         });
 
         // Sorting

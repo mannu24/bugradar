@@ -105,6 +105,72 @@ class BitbucketService
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // Webhooks
+    // -------------------------------------------------------------------------
+
+    /**
+     * Create a webhook on a repository.
+     * Bitbucket Cloud webhooks send X-Hub-Signature HMAC-SHA256 headers when
+     * a `secret` is set on the hook — same format as GitHub.
+     *
+     * @return string  The created hook's UUID.
+     * @throws \Exception on failure.
+     */
+    public function createWebhook(
+        string $workspace,
+        string $repoSlug,
+        string $callbackUrl,
+        string $secret,
+        array $events = [
+            'pullrequest:created',
+            'pullrequest:updated',
+            'pullrequest:approved',
+            'pullrequest:unapproved',
+            'pullrequest:fulfilled',
+            'pullrequest:rejected',
+            'issue:created',
+            'issue:updated',
+        ]
+    ): string {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->accessToken,
+            'Accept'        => 'application/json',
+        ])->post($this->baseUrl . "/repositories/{$workspace}/{$repoSlug}/hooks", [
+            'description' => 'BugRadar',
+            'url'         => $callbackUrl,
+            'active'      => true,
+            'events'      => $events,
+            'secret'      => $secret,
+        ]);
+
+        if ($response->failed()) {
+            throw new \Exception("Bitbucket webhook creation failed: {$response->body()}");
+        }
+
+        // Bitbucket wraps the UUID in braces: {abc-123-...}
+        $uuid = $response->json()['uuid'] ?? '';
+        return trim($uuid, '{}');
+    }
+
+    /**
+     * Delete a webhook from a repository.
+     */
+    public function deleteWebhook(string $workspace, string $repoSlug, string $hookId): void
+    {
+        // Bitbucket UUIDs must be wrapped in braces for the DELETE call
+        $uuid = str_starts_with($hookId, '{') ? $hookId : '{' . $hookId . '}';
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->accessToken,
+            'Accept'        => 'application/json',
+        ])->delete($this->baseUrl . "/repositories/{$workspace}/{$repoSlug}/hooks/{$uuid}");
+
+        if ($response->failed()) {
+            throw new \Exception("Bitbucket webhook deletion failed: {$response->body()}");
+        }
+    }
+
     /**
      * Make HTTP request to Bitbucket API
      */

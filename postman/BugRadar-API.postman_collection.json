@@ -1,622 +1,1138 @@
 {
   "info": {
-    "name": "BugRadar API",
-    "description": "Complete API collection for BugRadar - A unified dashboard for managing pull requests, issues, and reviews across GitHub, GitLab, and Bitbucket.",
+    "_postman_id": "bugradar-api-v2",
+    "name": "BugRadar API v2",
+    "description": "Complete BugRadar API collection.\n\n## Setup\n1. Import this collection\n2. Import one of the environment files (Local / Staging / Production)\n3. Select the environment in the top-right dropdown\n4. Run **Dev Login** first — token is saved automatically\n5. All other requests are ready to fire\n\n## Auth\nAll protected endpoints use `Authorization: Bearer {{auth_token}}` set at the collection level. The token is auto-saved by the Dev Login test script.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": { "major": 2, "minor": 0, "patch": 0 }
   },
   "auth": {
     "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{auth_token}}",
-        "type": "string"
-      }
-    ]
+    "bearer": [{ "key": "token", "value": "{{auth_token}}", "type": "string" }]
   },
-  "item": [
+  "event": [
     {
-      "name": "Authentication",
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": ["// Collection-level pre-request: nothing required — token set by Dev Login"]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-level: log response time",
+          "console.log(pm.info.requestName + ' → ' + pm.response.code + ' (' + pm.response.responseTime + 'ms)');"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    { "key": "auth_token", "value": "", "type": "string", "description": "Auto-populated by Dev Login" },
+    { "key": "integration_id", "value": "1", "type": "string", "description": "Set after listing integrations" },
+    { "key": "pr_id", "value": "1", "type": "string", "description": "Set after listing pull requests" },
+    { "key": "issue_id", "value": "1", "type": "string", "description": "Set after listing issues" },
+    { "key": "review_id", "value": "1", "type": "string", "description": "Set after listing reviews" },
+    { "key": "repo_full_name", "value": "owner/repo", "type": "string", "description": "e.g. manu/my-app — used by track/untrack" },
+    { "key": "device_token", "value": "test-device-token-123", "type": "string", "description": "Any string for testing FCM registration" },
+    { "key": "tracked_repository_id", "value": "1", "type": "string", "description": "TrackedRepository id — used in the webhook URL" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication — login, OAuth, and logout.",
       "item": [
         {
-          "name": "Google OAuth - Redirect",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/auth/google",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "google"]
-            },
-            "description": "Redirects to Google OAuth consent screen. Open this URL in a browser."
-          }
-        },
-        {
-          "name": "GitHub OAuth - Redirect",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/auth/github",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "github"]
-            },
-            "description": "Redirects to GitHub OAuth consent screen. Open this URL in a browser."
-          }
-        },
-        {
-          "name": "Dev Login (Local Only)",
+          "name": "Dev Login (Local only)",
           "event": [
             {
               "listen": "test",
               "script": {
+                "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    var jsonData = pm.response.json();",
-                  "    if (jsonData.token) {",
-                  "        pm.environment.set('auth_token', jsonData.token);",
-                  "        console.log('Token saved to environment');",
-                  "    }",
-                  "}"
-                ],
-                "type": "text/javascript"
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has token', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.token).to.be.a('string');",
+                  "    pm.environment.set('auth_token', json.token);",
+                  "    pm.collectionVariables.set('auth_token', json.token);",
+                  "    console.log('✅ Token saved: ' + json.token.substring(0, 20) + '...');",
+                  "});",
+                  "pm.test('Has user', () => pm.expect(pm.response.json().user).to.be.an('object'));"
+                ]
               }
             }
           ],
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
+            "auth": { "type": "noauth" },
             "method": "GET",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/auth/dev-login",
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "dev-login"]
             },
-            "description": "Development-only endpoint to get a test token. Only works in local environment."
+            "description": "⚠️ Local env only. Creates a test user and saves the token to `auth_token` environment variable automatically. Run this first."
           }
         },
         {
           "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has user object', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.user).to.be.an('object');",
+                  "    pm.expect(json.user.email).to.be.a('string');",
+                  "    console.log('👤 Logged in as: ' + json.user.email);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/auth/user",
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "user"]
             },
-            "description": "Returns the authenticated user's information."
+            "description": "Returns the authenticated user's profile."
+          }
+        },
+        {
+          "name": "GitHub OAuth Login (Browser)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/github?redirect_url=bugradar://oauth-callback",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "github"],
+              "query": [{ "key": "redirect_url", "value": "bugradar://oauth-callback", "description": "Deep link for mobile app" }]
+            },
+            "description": "Open this URL in a browser. Redirects to GitHub OAuth. After auth, deep-links back to the mobile app with ?token=xxx."
+          }
+        },
+        {
+          "name": "Google OAuth Login (Browser)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/google?redirect_url=bugradar://oauth-callback",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "google"],
+              "query": [{ "key": "redirect_url", "value": "bugradar://oauth-callback" }]
+            },
+            "description": "Open this URL in a browser. Redirects to Google OAuth."
           }
         },
         {
           "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Logout success', () => pm.expect(pm.response.json().success).to.be.true);",
+                  "pm.environment.unset('auth_token');",
+                  "pm.collectionVariables.set('auth_token', '');",
+                  "console.log('🚪 Logged out — token cleared');"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/auth/logout",
               "host": ["{{base_url}}"],
               "path": ["api", "auth", "logout"]
             },
-            "description": "Revokes the current authentication token."
+            "description": "Revokes the current Bearer token. Token is cleared from env automatically."
           }
         }
-      ],
-      "description": "Authentication endpoints for user login and OAuth flows."
+      ]
     },
+
     {
-      "name": "Integrations",
+      "name": "🔗 Integrations",
+      "description": "Connect, manage, and sync GitHub / GitLab / Bitbucket integrations.",
       "item": [
         {
           "name": "List All Integrations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns integrations array', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.integrations).to.be.an('array');",
+                  "    if (json.integrations.length > 0) {",
+                  "        pm.environment.set('integration_id', json.integrations[0].id);",
+                  "        pm.collectionVariables.set('integration_id', json.integrations[0].id);",
+                  "        console.log('🔗 ' + json.integrations.length + ' integration(s) | First ID: ' + json.integrations[0].id);",
+                  "    }",
+                  "});",
+                  "pm.test('Tokens not exposed', () => {",
+                  "    const integrations = pm.response.json().integrations;",
+                  "    if (integrations.length > 0) {",
+                  "        pm.expect(integrations[0]).to.not.have.property('access_token');",
+                  "        pm.expect(integrations[0]).to.not.have.property('refresh_token');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/integrations",
               "host": ["{{base_url}}"],
               "path": ["api", "integrations"]
             },
-            "description": "Returns all connected platform integrations for the authenticated user."
+            "description": "Returns all connected integrations. Access tokens are never exposed in this response."
           }
         },
         {
-          "name": "Connect GitHub",
+          "name": "Connect GitHub (Browser)",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/integrations/github/connect",
+              "raw": "{{base_url}}/api/integrations/github/connect?token={{auth_token}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "integrations", "github", "connect"]
+              "path": ["api", "integrations", "github", "connect"],
+              "query": [{ "key": "token", "value": "{{auth_token}}", "description": "Your Sanctum token — links this OAuth to your account" }]
             },
-            "description": "Initiates GitHub OAuth flow for integration. Open this URL in a browser."
+            "description": "Open this URL in a browser (with your token). Redirects to GitHub OAuth for repo/issue access. On success shows a confirmation page."
           }
         },
         {
-          "name": "Connect GitLab",
+          "name": "Connect GitLab (Browser)",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/integrations/gitlab/connect",
+              "raw": "{{base_url}}/api/integrations/gitlab/connect?token={{auth_token}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "integrations", "gitlab", "connect"]
+              "path": ["api", "integrations", "gitlab", "connect"],
+              "query": [{ "key": "token", "value": "{{auth_token}}" }]
             },
-            "description": "Initiates GitLab OAuth flow for integration. Open this URL in a browser."
+            "description": "Open in browser. Connects your GitLab account for MR and issue sync."
           }
         },
         {
-          "name": "Connect Bitbucket",
+          "name": "Connect Bitbucket (Browser)",
           "request": {
+            "auth": { "type": "noauth" },
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/integrations/bitbucket/connect",
+              "raw": "{{base_url}}/api/integrations/bitbucket/connect?token={{auth_token}}",
               "host": ["{{base_url}}"],
-              "path": ["api", "integrations", "bitbucket", "connect"]
+              "path": ["api", "integrations", "bitbucket", "connect"],
+              "query": [{ "key": "token", "value": "{{auth_token}}" }]
             },
-            "description": "Initiates Bitbucket OAuth flow for integration. Open this URL in a browser."
-          }
-        },
-        {
-          "name": "Disconnect Integration",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/integrations/{{integration_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "integrations", "{{integration_id}}"]
-            },
-            "description": "Disconnects and removes an integration. Replace {{integration_id}} with actual ID."
+            "description": "Open in browser. Connects your Bitbucket account for PR and issue sync."
           }
         },
         {
           "name": "Sync Integration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Sync dispatched', () => {",
+                  "    pm.expect(pm.response.json().success).to.be.true;",
+                  "    console.log('⚡ Sync job queued for integration ' + pm.environment.get('integration_id'));",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/integrations/{{integration_id}}/sync",
               "host": ["{{base_url}}"],
               "path": ["api", "integrations", "{{integration_id}}", "sync"]
             },
-            "description": "Manually triggers a sync for the specified integration."
+            "description": "Dispatches a background sync job. Set `integration_id` variable first."
+          }
+        },
+        {
+          "name": "Disconnect Integration",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Disconnected', () => pm.expect(pm.response.json().success).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}"]
+            },
+            "description": "⚠️ Permanently removes the integration and cascades to all PRs, issues, and reviews synced from it."
           }
         }
-      ],
-      "description": "Endpoints for managing platform integrations (GitHub, GitLab, Bitbucket)."
+      ]
     },
+
     {
-      "name": "Pull Requests",
+      "name": "📊 Dashboard",
+      "description": "Overview stats and recent activity feed.",
       "item": [
         {
-          "name": "List Pull Requests",
+          "name": "Get Dashboard Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has stats object', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.stats).to.be.an('object');",
+                  "    pm.expect(json.stats).to.have.property('open_prs');",
+                  "    pm.expect(json.stats).to.have.property('assigned_issues');",
+                  "    pm.expect(json.stats).to.have.property('total_reviews');",
+                  "    const s = json.stats;",
+                  "    console.log('📊 Open PRs: ' + s.open_prs + ' | Issues: ' + s.assigned_issues + ' | Reviews: ' + s.total_reviews);",
+                  "});",
+                  "pm.test('Has charts object', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.charts).to.be.an('object');",
+                  "    pm.expect(json.charts).to.have.property('prs_by_platform');",
+                  "    pm.expect(json.charts).to.have.property('issues_by_status');",
+                  "    pm.expect(json.charts).to.have.property('issues_by_priority');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pull-requests?per_page=20&page=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pull-requests"],
-              "query": [
-                {
-                  "key": "platform",
-                  "value": "github",
-                  "description": "Filter by platform (github, gitlab, bitbucket)",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "open",
-                  "description": "Filter by status (open, closed, merged)",
-                  "disabled": true
-                },
-                {
-                  "key": "repository",
-                  "value": "owner/repo",
-                  "description": "Filter by repository name",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_by",
-                  "value": "created_at",
-                  "description": "Sort field (created_at, updated_at, title)",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_order",
-                  "value": "desc",
-                  "description": "Sort order (asc, desc)",
-                  "disabled": true
-                },
-                {
-                  "key": "per_page",
-                  "value": "20",
-                  "description": "Items per page"
-                },
-                {
-                  "key": "page",
-                  "value": "1",
-                  "description": "Page number"
-                }
-              ]
-            },
-            "description": "Returns all pull requests from connected integrations with optional filters."
-          }
-        },
-        {
-          "name": "List Pull Requests - Filtered by Platform",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pull-requests?platform=github&status=open",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pull-requests"],
-              "query": [
-                {
-                  "key": "platform",
-                  "value": "github"
-                },
-                {
-                  "key": "status",
-                  "value": "open"
-                }
-              ]
-            },
-            "description": "Example: Get only open GitHub pull requests."
-          }
-        },
-        {
-          "name": "Get Pull Request Details",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pull-requests/{{pr_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pull-requests", "{{pr_id}}"]
-            },
-            "description": "Returns detailed information about a specific pull request."
-          }
-        },
-        {
-          "name": "Get Reviewed Pull Requests",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/pull-requests/reviewed?per_page=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "pull-requests", "reviewed"],
-              "query": [
-                {
-                  "key": "per_page",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Returns pull requests that the user has reviewed."
-          }
-        }
-      ],
-      "description": "Endpoints for managing and viewing pull requests across all platforms."
-    },
-    {
-      "name": "Issues",
-      "item": [
-        {
-          "name": "List Issues",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/issues?per_page=20&page=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "issues"],
-              "query": [
-                {
-                  "key": "platform",
-                  "value": "github",
-                  "description": "Filter by platform",
-                  "disabled": true
-                },
-                {
-                  "key": "type",
-                  "value": "bug",
-                  "description": "Filter by type (bug, feature, task)",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "open",
-                  "description": "Filter by status (open, closed, in_progress)",
-                  "disabled": true
-                },
-                {
-                  "key": "priority",
-                  "value": "high",
-                  "description": "Filter by priority (low, medium, high, critical)",
-                  "disabled": true
-                },
-                {
-                  "key": "repository",
-                  "value": "owner/repo",
-                  "description": "Filter by repository",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_by",
-                  "value": "created_at",
-                  "description": "Sort field",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_order",
-                  "value": "desc",
-                  "description": "Sort order",
-                  "disabled": true
-                },
-                {
-                  "key": "per_page",
-                  "value": "20"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                }
-              ]
-            },
-            "description": "Returns all issues from connected integrations with optional filters."
-          }
-        },
-        {
-          "name": "List Issues - High Priority Bugs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/issues?type=bug&priority=high&status=open",
-              "host": ["{{base_url}}"],
-              "path": ["api", "issues"],
-              "query": [
-                {
-                  "key": "type",
-                  "value": "bug"
-                },
-                {
-                  "key": "priority",
-                  "value": "high"
-                },
-                {
-                  "key": "status",
-                  "value": "open"
-                }
-              ]
-            },
-            "description": "Example: Get only open high-priority bugs."
-          }
-        },
-        {
-          "name": "Get Issue Details",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/issues/{{issue_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "issues", "{{issue_id}}"]
-            },
-            "description": "Returns detailed information about a specific issue."
-          }
-        },
-        {
-          "name": "Get Bug Issues",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/issues/bugs?per_page=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "issues", "bugs"],
-              "query": [
-                {
-                  "key": "per_page",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Returns only bug-type issues."
-          }
-        },
-        {
-          "name": "Get Task Issues",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/issues/tasks?per_page=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "issues", "tasks"],
-              "query": [
-                {
-                  "key": "per_page",
-                  "value": "20"
-                }
-              ]
-            },
-            "description": "Returns only task-type issues."
-          }
-        }
-      ],
-      "description": "Endpoints for managing and viewing issues across all platforms."
-    },
-    {
-      "name": "Reviews",
-      "item": [
-        {
-          "name": "List Reviews",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/reviews?per_page=20&page=1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews"],
-              "query": [
-                {
-                  "key": "platform",
-                  "value": "github",
-                  "description": "Filter by platform",
-                  "disabled": true
-                },
-                {
-                  "key": "status",
-                  "value": "approved",
-                  "description": "Filter by status (approved, changes_requested, commented)",
-                  "disabled": true
-                },
-                {
-                  "key": "from_date",
-                  "value": "2024-01-01",
-                  "description": "Filter from date (YYYY-MM-DD)",
-                  "disabled": true
-                },
-                {
-                  "key": "to_date",
-                  "value": "2024-12-31",
-                  "description": "Filter to date (YYYY-MM-DD)",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_by",
-                  "value": "reviewed_at",
-                  "description": "Sort field",
-                  "disabled": true
-                },
-                {
-                  "key": "sort_order",
-                  "value": "desc",
-                  "description": "Sort order",
-                  "disabled": true
-                },
-                {
-                  "key": "per_page",
-                  "value": "20"
-                },
-                {
-                  "key": "page",
-                  "value": "1"
-                }
-              ]
-            },
-            "description": "Returns all reviews by the authenticated user with optional filters."
-          }
-        },
-        {
-          "name": "List Reviews - This Month",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/reviews?from_date={{current_month_start}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews"],
-              "query": [
-                {
-                  "key": "from_date",
-                  "value": "{{current_month_start}}"
-                }
-              ]
-            },
-            "description": "Example: Get reviews from this month."
-          }
-        },
-        {
-          "name": "Get Review Details",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/reviews/{{review_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "{{review_id}}"]
-            },
-            "description": "Returns detailed information about a specific review."
-          }
-        },
-        {
-          "name": "Get Review Statistics",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/reviews/stats",
-              "host": ["{{base_url}}"],
-              "path": ["api", "reviews", "stats"]
-            },
-            "description": "Returns review statistics for the authenticated user."
-          }
-        }
-      ],
-      "description": "Endpoints for viewing review history and statistics."
-    },
-    {
-      "name": "Dashboard",
-      "item": [
-        {
-          "name": "Get Dashboard Statistics",
-          "request": {
-            "method": "GET",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
               "raw": "{{base_url}}/api/dashboard/stats",
               "host": ["{{base_url}}"],
               "path": ["api", "dashboard", "stats"]
             },
-            "description": "Returns overview statistics for the dashboard including PRs, issues, reviews, and integrations."
+            "description": "Returns: open PR count, assigned issue count, total review count, PRs by platform chart, issues by status chart, issues by priority chart."
           }
         },
         {
           "name": "Get Recent Activity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has recent data', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.recent_prs).to.be.an('array');",
+                  "    pm.expect(json.recent_issues).to.be.an('array');",
+                  "    pm.expect(json.recent_reviews).to.be.an('array');",
+                  "    console.log('🕐 Recent: ' + json.recent_prs.length + ' PRs | ' + json.recent_issues.length + ' Issues | ' + json.recent_reviews.length + ' Reviews');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [{ "key": "Accept", "value": "application/json" }],
             "url": {
-              "raw": "{{base_url}}/api/dashboard/recent?limit=10",
+              "raw": "{{base_url}}/api/dashboard/recent",
               "host": ["{{base_url}}"],
-              "path": ["api", "dashboard", "recent"],
-              "query": [
-                {
-                  "key": "limit",
-                  "value": "10",
-                  "description": "Number of items to return"
-                }
-              ]
+              "path": ["api", "dashboard", "recent"]
             },
-            "description": "Returns recent activity across all integrations."
+            "description": "Returns the last 10 PRs, 10 issues, and 10 reviews — sorted by most recently updated."
           }
         }
-      ],
-      "description": "Dashboard endpoints for overview statistics and recent activity."
-    }
-  ],
-  "variable": [
+      ]
+    },
+
     {
-      "key": "base_url",
-      "value": "http://localhost:8006",
-      "type": "string"
+      "name": "🔀 Pull Requests",
+      "description": "List, filter, and inspect pull requests across all platforms.",
+      "item": [
+        {
+          "name": "List All PRs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Paginated response', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    pm.expect(json).to.have.property('total');",
+                  "    pm.expect(json).to.have.property('current_page');",
+                  "    if (json.data.length > 0) {",
+                  "        pm.collectionVariables.set('pr_id', json.data[0].id);",
+                  "        pm.environment.set('pr_id', json.data[0].id);",
+                  "        console.log('🔀 ' + json.total + ' total PRs | First ID: ' + json.data[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [
+                { "key": "status", "value": "open", "description": "open | closed | merged | draft", "disabled": true },
+                { "key": "platform", "value": "github", "description": "github | gitlab | bitbucket", "disabled": true },
+                { "key": "repository", "value": "owner/repo", "description": "Exact repo name e.g. testuser/my-app", "disabled": true },
+                { "key": "sort_by", "value": "updated_at", "description": "updated_at | created_at | title", "disabled": true },
+                { "key": "sort_order", "value": "desc", "description": "asc | desc", "disabled": true },
+                { "key": "page", "value": "1" }
+              ]
+            },
+            "description": "All PRs for the authenticated user. Enable query params to filter. First PR ID is auto-saved to `pr_id`."
+          }
+        },
+        {
+          "name": "List Open PRs — GitHub only",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('All are open and github', () => {",
+                  "    pm.response.json().data.forEach(pr => {",
+                  "        pm.expect(pr.state).to.equal('open');",
+                  "        pm.expect(pr.integration.platform).to.equal('github');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?status=open&platform=github",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [
+                { "key": "status", "value": "open" },
+                { "key": "platform", "value": "github" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Merged PRs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?status=merged",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [{ "key": "status", "value": "merged" }]
+            }
+          }
+        },
+        {
+          "name": "List PRs by Repository",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests?repository=testuser/my-app",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests"],
+              "query": [{ "key": "repository", "value": "testuser/my-app", "description": "Change to your actual repo name" }]
+            }
+          }
+        },
+        {
+          "name": "List Reviewed PRs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has reviews on each PR', () => {",
+                  "    pm.response.json().data.forEach(pr => {",
+                  "        pm.expect(pr.reviews).to.be.an('array');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests/reviewed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests", "reviewed"]
+            },
+            "description": "PRs that the authenticated user has submitted a review on. Each PR includes its reviews array."
+          }
+        },
+        {
+          "name": "Get PR Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('PR has required fields', () => {",
+                  "    const pr = pm.response.json().pull_request;",
+                  "    pm.expect(pr).to.have.property('title');",
+                  "    pm.expect(pr).to.have.property('state');",
+                  "    pm.expect(pr).to.have.property('repository');",
+                  "    pm.expect(pr).to.have.property('labels');",
+                  "    pm.expect(pr.labels).to.be.an('array');",
+                  "    pm.expect(pr).to.have.property('reviews');",
+                  "    pm.expect(pr.reviews).to.be.an('array');",
+                  "    pm.expect(pr).to.have.property('integration');",
+                  "    console.log('🔀 PR: ' + pr.title + ' [' + pr.state + '] | ' + pr.reviews.length + ' review(s)');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/pull-requests/{{pr_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pull-requests", "{{pr_id}}"]
+            },
+            "description": "Full PR detail with reviews and integration info. Uses `pr_id` variable (auto-set by List All PRs)."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🐛 Issues",
+      "description": "List, filter, and inspect issues across all platforms.",
+      "item": [
+        {
+          "name": "List All Issues",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Paginated response', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    pm.expect(json).to.have.property('total');",
+                  "    if (json.data.length > 0) {",
+                  "        pm.collectionVariables.set('issue_id', json.data[0].id);",
+                  "        pm.environment.set('issue_id', json.data[0].id);",
+                  "        console.log('🐛 ' + json.total + ' total issues | First ID: ' + json.data[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                { "key": "type", "value": "bug", "description": "bug | task | feature", "disabled": true },
+                { "key": "status", "value": "open", "description": "open | closed | in_progress", "disabled": true },
+                { "key": "priority", "value": "critical", "description": "low | medium | high | critical", "disabled": true },
+                { "key": "platform", "value": "github", "description": "github | gitlab | bitbucket", "disabled": true },
+                { "key": "repository", "value": "owner/repo", "description": "Exact repo name", "disabled": true },
+                { "key": "sort_by", "value": "updated_at", "description": "updated_at | created_at | priority", "disabled": true },
+                { "key": "sort_order", "value": "desc", "description": "asc | desc", "disabled": true },
+                { "key": "page", "value": "1" }
+              ]
+            },
+            "description": "All issues for the authenticated user. Enable any query param to filter. First issue ID is auto-saved to `issue_id`."
+          }
+        },
+        {
+          "name": "List Open Critical Bugs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('All are critical open bugs', () => {",
+                  "    pm.response.json().data.forEach(i => {",
+                  "        pm.expect(i.type).to.equal('bug');",
+                  "        pm.expect(i.state).to.equal('open');",
+                  "        pm.expect(i.priority).to.equal('critical');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues?type=bug&status=open&priority=critical",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                { "key": "type", "value": "bug" },
+                { "key": "status", "value": "open" },
+                { "key": "priority", "value": "critical" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Open Issues — GitLab only",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues?status=open&platform=gitlab",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues"],
+              "query": [
+                { "key": "status", "value": "open" },
+                { "key": "platform", "value": "gitlab" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Bugs (Shortcut) — Sorted by Severity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('All type=bug', () => {",
+                  "    pm.response.json().data.forEach(i => pm.expect(i.type).to.equal('bug'));",
+                  "});",
+                  "pm.test('Critical before high', () => {",
+                  "    const priorities = pm.response.json().data.map(i => i.priority);",
+                  "    const critIdx = priorities.indexOf('critical');",
+                  "    const highIdx = priorities.indexOf('high');",
+                  "    if (critIdx !== -1 && highIdx !== -1) pm.expect(critIdx).to.be.below(highIdx);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues/bugs?sort_by=priority",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "bugs"],
+              "query": [{ "key": "sort_by", "value": "priority", "description": "Uses FIELD() ordering: critical > high > medium > low" }]
+            },
+            "description": "Bugs ordered by severity. critical → high → medium → low."
+          }
+        },
+        {
+          "name": "List Tasks (Shortcut)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues/tasks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "tasks"]
+            }
+          }
+        },
+        {
+          "name": "Get Issue Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Issue has required fields', () => {",
+                  "    const i = pm.response.json().issue;",
+                  "    pm.expect(i).to.have.property('title');",
+                  "    pm.expect(i).to.have.property('type');",
+                  "    pm.expect(i).to.have.property('state');",
+                  "    pm.expect(i).to.have.property('priority');",
+                  "    pm.expect(i.assignees).to.be.an('array');",
+                  "    pm.expect(i.labels).to.be.an('array');",
+                  "    pm.expect(i).to.have.property('integration');",
+                  "    console.log('🐛 Issue: ' + i.title + ' [' + i.priority + '/' + i.type + ']');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/issues/{{issue_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "issues", "{{issue_id}}"]
+            },
+            "description": "Full issue detail with assignees, labels, and integration info."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "⭐ Reviews",
+      "description": "Review history, stats, and filtering.",
+      "item": [
+        {
+          "name": "List All Reviews",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Paginated response', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.data).to.be.an('array');",
+                  "    pm.expect(json).to.have.property('total');",
+                  "    if (json.data.length > 0) {",
+                  "        pm.collectionVariables.set('review_id', json.data[0].id);",
+                  "        pm.environment.set('review_id', json.data[0].id);",
+                  "        console.log('⭐ ' + json.total + ' total reviews | First ID: ' + json.data[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [
+                { "key": "status", "value": "approved", "description": "approved | changes_requested | commented | dismissed", "disabled": true },
+                { "key": "platform", "value": "github", "description": "github | gitlab | bitbucket", "disabled": true },
+                { "key": "from_date", "value": "2026-07-01", "description": "YYYY-MM-DD", "disabled": true },
+                { "key": "to_date", "value": "2026-07-31", "description": "YYYY-MM-DD", "disabled": true },
+                { "key": "sort_by", "value": "submitted_at", "description": "submitted_at | created_at", "disabled": true },
+                { "key": "sort_order", "value": "desc", "description": "asc | desc", "disabled": true },
+                { "key": "per_page", "value": "20", "disabled": true },
+                { "key": "page", "value": "1" }
+              ]
+            },
+            "description": "All reviews by the authenticated user. First review ID auto-saved to `review_id`."
+          }
+        },
+        {
+          "name": "List Approved Reviews",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?status=approved",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [{ "key": "status", "value": "approved" }]
+            }
+          }
+        },
+        {
+          "name": "List Reviews — Changes Requested",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?status=changes_requested",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [{ "key": "status", "value": "changes_requested" }]
+            }
+          }
+        },
+        {
+          "name": "List Reviews — This Month",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews?from_date=2026-07-01",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews"],
+              "query": [{ "key": "from_date", "value": "2026-07-01", "description": "Update to start of current month" }]
+            }
+          }
+        },
+        {
+          "name": "Get Review Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has all stat fields', () => {",
+                  "    const json = pm.response.json();",
+                  "    ['total_reviews','approved','changes_requested','commented','this_week','this_month'].forEach(k => {",
+                  "        pm.expect(json).to.have.property(k);",
+                  "        pm.expect(json[k]).to.be.a('number');",
+                  "    });",
+                  "    console.log('⭐ Stats → Total: ' + json.total_reviews + ' | Approved: ' + json.approved + ' | This month: ' + json.this_month);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "stats"]
+            },
+            "description": "Returns: total_reviews, approved, changes_requested, commented, this_week, this_month."
+          }
+        },
+        {
+          "name": "Get Review Detail",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Review has pull_request', () => {",
+                  "    const r = pm.response.json().review;",
+                  "    pm.expect(r).to.have.property('state');",
+                  "    pm.expect(r).to.have.property('body');",
+                  "    pm.expect(r).to.have.property('submitted_at');",
+                  "    pm.expect(r.pull_request).to.be.an('object');",
+                  "    pm.expect(r.pull_request).to.have.property('title');",
+                  "    console.log('⭐ Review [' + r.state + '] on PR: ' + r.pull_request.title);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/reviews/{{review_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reviews", "{{review_id}}"]
+            },
+            "description": "Full review detail including the linked pull request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📁 Repositories",
+      "description": "Per-repo tracking. List repos, toggle tracking on/off. Tracking a repo registers a GitHub webhook (best-effort) and triggers a sync.",
+      "item": [
+        {
+          "name": "List Repositories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has repositories array', () => pm.expect(json.repositories).to.be.an('array'));",
+                  "if (json.repositories && json.repositories.length) {",
+                  "    console.log('Repos: ' + json.repositories.length + ' | tracked: ' + json.repositories.filter(r => r.tracked).length);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}/repositories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}", "repositories"]
+            },
+            "description": "Lists all repos from the platform for this integration, each flagged tracked:true/false and webhook:true/false. Set integration_id first."
+          }
+        },
+        {
+          "name": "Track Repository",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Tracked', () => pm.expect(json.success).to.be.true);",
+                  "console.log('Realtime (webhook) active: ' + json.realtime);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repo_full_name\": \"{{repo_full_name}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}/repositories/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}", "repositories", "track"]
+            },
+            "description": "Toggle a repo ON. Set repo_full_name variable (e.g. manu/my-app). Registers a GitHub webhook (needs admin:repo_hook scope + repo admin rights) and triggers a sync. If webhook registration fails, polling still covers the repo (realtime:false)."
+          }
+        },
+        {
+          "name": "Untrack Repository",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Untracked', () => pm.expect(pm.response.json().success).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repo_full_name\": \"{{repo_full_name}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/integrations/{{integration_id}}/repositories/track",
+              "host": ["{{base_url}}"],
+              "path": ["api", "integrations", "{{integration_id}}", "repositories", "track"]
+            },
+            "description": "Toggle a repo OFF. Removes the webhook and stops syncing. Already-synced data is KEPT (Option A)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Device Tokens",
+      "description": "Register/unregister the device's FCM token so the user receives push notifications.",
+      "item": [
+        {
+          "name": "Register Device Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Registered', () => pm.expect(pm.response.json().success).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"platform\": \"android\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/device-tokens",
+              "host": ["{{base_url}}"],
+              "path": ["api", "device-tokens"]
+            },
+            "description": "Register (or refresh) the current device's FCM token. platform is ios or android. Set device_token to any string for testing."
+          }
+        },
+        {
+          "name": "Unregister Device Token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/device-tokens",
+              "host": ["{{base_url}}"],
+              "path": ["api", "device-tokens"]
+            },
+            "description": "Remove a device token (e.g. on logout)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🪝 Webhooks (inbound — reference only)",
+      "description": "Platforms call these; you don't call them manually. Signature/token is verified per-repo. Manual calls without a valid secret return 401 — expected. Use the platform's Redeliver / Test button to trigger real deliveries.",
+      "item": [
+        {
+          "name": "GitHub Webhook Receiver",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-GitHub-Event", "value": "ping" },
+              { "key": "X-Hub-Signature-256", "value": "sha256=computed-by-github" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"zen\": \"Keep it simple\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/github/{{tracked_repository_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "github", "{{tracked_repository_id}}"]
+            },
+            "description": "GitHub verifies with HMAC-SHA256 in X-Hub-Signature-256 header."
+          }
+        },
+        {
+          "name": "GitLab Webhook Receiver",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Gitlab-Event", "value": "Merge Request Hook" },
+              { "key": "X-Gitlab-Token", "value": "shared-plaintext-secret" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object_kind\": \"merge_request\",\n  \"user\": { \"username\": \"alice\" },\n  \"object_attributes\": { \"id\": 1, \"title\": \"Test\", \"state\": \"opened\", \"action\": \"open\" }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/gitlab/{{tracked_repository_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "gitlab", "{{tracked_repository_id}}"]
+            },
+            "description": "GitLab verifies with plaintext token in X-Gitlab-Token header (matched against the repo's stored secret)."
+          }
+        },
+        {
+          "name": "Bitbucket Webhook Receiver",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Event-Key", "value": "pullrequest:created" },
+              { "key": "X-Hub-Signature", "value": "sha256=computed-by-bitbucket" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pullrequest\": { \"id\": 1, \"title\": \"Test\", \"state\": \"OPEN\", \"author\": { \"display_name\": \"alice\" } }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/webhooks/bitbucket/{{tracked_repository_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "webhooks", "bitbucket", "{{tracked_repository_id}}"]
+            },
+            "description": "Bitbucket verifies with HMAC-SHA256 in X-Hub-Signature header (same format as GitHub)."
+          }
+        }
+      ]
     }
   ]
 }

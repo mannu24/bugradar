@@ -26,20 +26,20 @@ class ReviewController extends Controller
 
         // Filter by status
         if ($request->has('status')) {
-            $query->where('status', $request->status);
+            $query->where('state', $request->status);
         }
 
         // Filter by date range
         if ($request->has('from_date')) {
-            $query->where('reviewed_at', '>=', $request->from_date);
+            $query->where('submitted_at', '>=', $request->from_date);
         }
 
         if ($request->has('to_date')) {
-            $query->where('reviewed_at', '<=', $request->to_date);
+            $query->where('submitted_at', '<=', $request->to_date);
         }
 
         // Sort
-        $sortBy = $request->get('sort_by', 'reviewed_at');
+        $sortBy = $request->get('sort_by', 'submitted_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
 
@@ -81,23 +81,23 @@ class ReviewController extends Controller
 
             'approved' => Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->where('status', 'approved')->count(),
+            })->where('state', 'approved')->count(),
 
             'changes_requested' => Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->where('status', 'changes_requested')->count(),
+            })->where('state', 'changes_requested')->count(),
 
             'commented' => Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->where('status', 'commented')->count(),
+            })->where('state', 'commented')->count(),
 
             'this_week' => Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->where('reviewed_at', '>=', now()->startOfWeek())->count(),
+            })->where('submitted_at', '>=', now()->startOfWeek())->count(),
 
             'this_month' => Review::whereHas('pullRequest.integration', function ($q) use ($userId) {
                 $q->where('user_id', $userId);
-            })->where('reviewed_at', '>=', now()->startOfMonth())->count(),
+            })->where('submitted_at', '>=', now()->startOfMonth())->count(),
         ];
 
         return response()->json($stats);

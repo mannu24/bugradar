@@ -63,4 +63,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Integration::class);
     }
+
+    /**
+     * Get the registered device (FCM) tokens for the user.
+     */
+    public function deviceTokens()
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
 }

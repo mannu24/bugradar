@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Concerns\HandlesOAuthState;
 use App\Models\Integration;
-use App\Services\GitHubService;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Laravel\Socialite\Facades\Socialite;
 
 class IntegrationController extends Controller
 {
-    public function __construct(
-        private GitHubService $githubService
-    ) {}
+    use HandlesOAuthState;
 
     /**
      * List all user integrations.
@@ -28,276 +28,178 @@ class IntegrationController extends Controller
         ]);
     }
 
+    // -------------------------------------------------------------------------
+    // GitHub Integration
+    // -------------------------------------------------------------------------
+
     /**
      * Redirect to GitHub OAuth for integration.
+     *
+     * Uses the SAME GitHub OAuth App as login — the intent is encoded in the
+     * OAuth state parameter. GitHub returns to /api/auth/github/callback which
+     * routes to the correct handler based on the state.
      */
     public function connectGithub(Request $request)
     {
-        // Try to get user from:
-        // 1. Token in query parameter (?token=xxx)
-        // 2. Bearer token in Authorization header
-        // 3. Session authentication
-        $user = null;
-        
-        // Check for token in query parameter
-        if ($request->has('token')) {
-            $token = $request->get('token');
-            $personalAccessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-            
-            if ($personalAccessToken) {
-                $user = $personalAccessToken->tokenable;
-            }
-        }
-        
-        // Fallback to normal authentication
+        $user = $this->resolveUserFromRequest($request);
+
         if (!$user) {
-            $user = $request->user() ?? auth()->user();
-        }
-        
-        if (!$user) {
-            // User not logged in - show error page
             return response()->view('integration-error', [
                 'platform' => 'GitHub',
-                'error' => 'User not authenticated. Please login first or provide a valid token.',
+                'error'    => 'User not authenticated. Please login first or provide a valid token.',
             ]);
         }
-        
-        // Store user ID in session for callback
-        session(['integration_user_id' => $user->id]);
-        
-        // Use custom redirect URL for integration
-        return Socialite::driver('github')
-            ->redirectUrl(config('app.url') . '/api/integrations/github/callback')
-            ->scopes(['repo', 'read:user', 'user:email', 'read:org'])
+
+        // Delegate the OAuth redirect to AuthController which builds the signed state
+        return app(AuthController::class)->redirectToGithubIntegration(
+            $user->id,
+            $request->get('redirect_url')
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // GitLab Integration
+    // -------------------------------------------------------------------------
+
+    public function connectGitlab(Request $request)
+    {
+        // Full `api` scope is required to create project webhooks (read_api is read-only)
+        return $this->startConnect($request, 'gitlab', ['read_user', 'api', 'read_repository'], 'GitLab');
+    }
+
+    public function handleGitlabCallback(Request $request)
+    {
+        return $this->finishConnect($request, 'gitlab', 'GitLab', \App\Jobs\SyncGitLabData::class);
+    }
+
+    // -------------------------------------------------------------------------
+    // Bitbucket Integration
+    // -------------------------------------------------------------------------
+
+    public function connectBitbucket(Request $request)
+    {
+        // `webhook` scope is required to create repo webhooks
+        return $this->startConnect($request, 'bitbucket', ['repository', 'pullrequest', 'issue', 'webhook'], 'Bitbucket');
+    }
+
+    public function handleBitbucketCallback(Request $request)
+    {
+        return $this->finishConnect($request, 'bitbucket', 'Bitbucket', \App\Jobs\SyncBitbucketData::class);
+    }
+
+    // -------------------------------------------------------------------------
+    // Shared connect flow (GitLab, Bitbucket, and future OAuth platforms)
+    //
+    // Uses the same stateless + signed-state pattern as GitHub:
+    //   - user + redirect_url encoded in a signed `state` param (no session)
+    //   - Socialite stateless (our HMAC state provides CSRF protection)
+    //   - callback verifies state, creates integration, deep-links back to app
+    // -------------------------------------------------------------------------
+
+    /**
+     * Begin an OAuth connect for the given platform.
+     */
+    private function startConnect(Request $request, string $driver, array $scopes, string $displayName)
+    {
+        $user = $this->resolveUserFromRequest($request);
+
+        if (!$user) {
+            return response()->view('integration-error', [
+                'platform' => $displayName,
+                'error'    => 'User not authenticated. Please login first or provide a valid token.',
+            ]);
+        }
+
+        $payload = ['intent' => 'connect', 'user_id' => $user->id];
+        if ($request->has('redirect_url')) {
+            $payload['redirect_url'] = $request->get('redirect_url');
+        }
+        $state = $this->buildState($payload);
+
+        return Socialite::driver($driver)
+            ->stateless()
+            ->scopes($scopes)
+            ->with(['state' => $state])
             ->redirect();
     }
 
     /**
-     * Handle GitHub OAuth callback for integration.
+     * Complete an OAuth connect callback for the given platform.
      */
-    public function handleGithubCallback(Request $request)
+    private function finishConnect(Request $request, string $driver, string $displayName, string $syncJobClass)
     {
+        $state       = $this->verifyState($request->get('state', ''));
+        $redirectUrl = $state['redirect_url'] ?? null;
+
         try {
-            $socialiteUser = Socialite::driver('github')
-                ->redirectUrl(config('app.url') . '/api/integrations/github/callback')
-                ->user();
-            
-            // Get user from session or auth
-            $user = null;
-            if (session('integration_user_id')) {
-                $user = \App\Models\User::find(session('integration_user_id'));
-                session()->forget('integration_user_id');
-            } else {
-                $user = $request->user() ?? auth()->user();
+            if ($state === null) {
+                throw new \Exception('Invalid OAuth state. Please try again.');
             }
 
+            $user = User::find($state['user_id'] ?? null);
             if (!$user) {
-                throw new \Exception('User not authenticated. Please login first.');
+                throw new \Exception('User not found. Please login and try again.');
             }
 
-            // Create or update integration
+            $socialiteUser = Socialite::driver($driver)->stateless()->user();
+
+            // The Integration model mutator handles token encryption — pass raw values.
             $integration = Integration::updateOrCreate(
+                ['user_id' => $user->id, 'platform' => $driver],
                 [
-                    'user_id' => $user->id,
-                    'platform' => 'github',
                     'platform_user_id' => $socialiteUser->getId(),
-                ],
-                [
-                    'username' => $socialiteUser->getNickname(),
-                    'access_token' => encrypt($socialiteUser->token),
-                    'refresh_token' => $socialiteUser->refreshToken ? encrypt($socialiteUser->refreshToken) : null,
-                    'expires_at' => $socialiteUser->expiresIn ? now()->addSeconds($socialiteUser->expiresIn) : null,
-                    'is_active' => true,
+                    'username'         => $socialiteUser->getNickname(),
+                    'email'            => $socialiteUser->getEmail(),
+                    'avatar'           => $socialiteUser->getAvatar(),
+                    'access_token'     => $socialiteUser->token,
+                    'refresh_token'    => $socialiteUser->refreshToken ?: null,
+                    'expires_at'       => $socialiteUser->expiresIn ? now()->addSeconds($socialiteUser->expiresIn) : null,
+                    'is_active'        => true,
                 ]
             );
 
-            // Trigger initial sync
-            dispatch(new \App\Jobs\SyncGitHubData($integration));
+            dispatch(new $syncJobClass($integration));
 
-            // Return success page for browser
+            if ($redirectUrl) {
+                $deepLink = $this->buildDeepLink($redirectUrl, [
+                    'success'        => 'true',
+                    'type'           => 'integration',
+                    'platform'       => $driver,
+                    'integration_id' => $integration->id,
+                ]);
+                return $this->deepLinkRedirectResponse(
+                    $deepLink,
+                    "{$displayName} Connected!",
+                    'Syncing your data… returning to BugRadar.'
+                );
+            }
+
             return response()->view('integration-success', [
-                'platform' => 'GitHub',
-                'username' => $socialiteUser->getNickname(),
+                'platform'       => $displayName,
+                'username'       => $socialiteUser->getNickname(),
                 'integration_id' => $integration->id,
             ]);
         } catch (\Exception $e) {
+            if ($redirectUrl) {
+                $deepLink = $this->buildDeepLink($redirectUrl, [
+                    'success'  => 'false',
+                    'type'     => 'integration',
+                    'platform' => $driver,
+                    'error'    => $e->getMessage(),
+                ]);
+                return $this->deepLinkRedirectResponse($deepLink, "{$displayName} Connection Failed", $e->getMessage(), true);
+            }
+
             return response()->view('integration-error', [
-                'platform' => 'GitHub',
-                'error' => $e->getMessage(),
+                'platform' => $displayName,
+                'error'    => $e->getMessage(),
             ]);
         }
     }
 
-    /**
-     * Redirect to GitLab OAuth for integration.
-     */
-    public function connectGitlab(Request $request): \Symfony\Component\HttpFoundation\RedirectResponse
-    {
-        // Try to get user from token parameter, bearer token, or session
-        $user = null;
-        
-        if ($request->has('token')) {
-            $token = $request->get('token');
-            $personalAccessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-            
-            if ($personalAccessToken) {
-                $user = $personalAccessToken->tokenable;
-            }
-        }
-        
-        if (!$user) {
-            $user = $request->user() ?? auth()->user();
-        }
-        
-        if ($user) {
-            session(['integration_user_id' => $user->id]);
-        }
-        
-        return Socialite::driver('gitlab')
-            ->scopes(['read_user', 'read_api', 'read_repository'])
-            ->redirect();
-    }
-
-    /**
-     * Handle GitLab OAuth callback for integration.
-     */
-    public function handleGitlabCallback(Request $request)
-    {
-        try {
-            $socialiteUser = Socialite::driver('gitlab')->user();
-            $user = $request->user() ?? auth()->user();
-
-            if (!$user) {
-                throw new \Exception('User not authenticated');
-            }
-
-            // Create or update integration
-            $integration = Integration::updateOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'platform' => 'gitlab',
-                    'platform_user_id' => $socialiteUser->getId(),
-                ],
-                [
-                    'username' => $socialiteUser->getNickname(),
-                    'access_token' => encrypt($socialiteUser->token),
-                    'refresh_token' => $socialiteUser->refreshToken ? encrypt($socialiteUser->refreshToken) : null,
-                    'expires_at' => $socialiteUser->expiresIn ? now()->addSeconds($socialiteUser->expiresIn) : null,
-                    'is_active' => true,
-                    'metadata' => [
-                        'instance_url' => config('services.gitlab.instance_url', 'https://gitlab.com/api/v4')
-                    ]
-                ]
-            );
-
-            // Trigger initial sync
-            dispatch(new \App\Jobs\SyncGitLabData($integration));
-
-            $redirectUrl = $request->get('redirect_url');
-            if ($redirectUrl) {
-                return redirect($redirectUrl . '?success=true&integration_id=' . $integration->id);
-            }
-
-            return response()->json([
-                'success' => true,
-                'integration' => $integration,
-            ]);
-        } catch (\Exception $e) {
-            $redirectUrl = $request->get('redirect_url');
-            if ($redirectUrl) {
-                return redirect($redirectUrl . '?success=false&error=' . urlencode($e->getMessage()));
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Integration failed: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Redirect to Bitbucket OAuth for integration.
-     */
-    public function connectBitbucket(Request $request): \Symfony\Component\HttpFoundation\RedirectResponse
-    {
-        // Try to get user from token parameter, bearer token, or session
-        $user = null;
-        
-        if ($request->has('token')) {
-            $token = $request->get('token');
-            $personalAccessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-            
-            if ($personalAccessToken) {
-                $user = $personalAccessToken->tokenable;
-            }
-        }
-        
-        if (!$user) {
-            $user = $request->user() ?? auth()->user();
-        }
-        
-        if ($user) {
-            session(['integration_user_id' => $user->id]);
-        }
-        
-        return Socialite::driver('bitbucket')
-            ->scopes(['repository', 'pullrequest', 'issue'])
-            ->redirect();
-    }
-
-    /**
-     * Handle Bitbucket OAuth callback for integration.
-     */
-    public function handleBitbucketCallback(Request $request)
-    {
-        try {
-            $socialiteUser = Socialite::driver('bitbucket')->user();
-            $user = $request->user() ?? auth()->user();
-
-            if (!$user) {
-                throw new \Exception('User not authenticated');
-            }
-
-            // Create or update integration
-            $integration = Integration::updateOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'platform' => 'bitbucket',
-                    'platform_user_id' => $socialiteUser->getId(),
-                ],
-                [
-                    'username' => $socialiteUser->getNickname(),
-                    'access_token' => encrypt($socialiteUser->token),
-                    'refresh_token' => $socialiteUser->refreshToken ? encrypt($socialiteUser->refreshToken) : null,
-                    'expires_at' => $socialiteUser->expiresIn ? now()->addSeconds($socialiteUser->expiresIn) : null,
-                    'is_active' => true,
-                ]
-            );
-
-            // Trigger initial sync
-            dispatch(new \App\Jobs\SyncBitbucketData($integration));
-
-            $redirectUrl = $request->get('redirect_url');
-            if ($redirectUrl) {
-                return redirect($redirectUrl . '?success=true&integration_id=' . $integration->id);
-            }
-
-            return response()->json([
-                'success' => true,
-                'integration' => $integration,
-            ]);
-        } catch (\Exception $e) {
-            $redirectUrl = $request->get('redirect_url');
-            if ($redirectUrl) {
-                return redirect($redirectUrl . '?success=false&error=' . urlencode($e->getMessage()));
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Integration failed: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Management
+    // -------------------------------------------------------------------------
 
     /**
      * Disconnect an integration.
@@ -338,17 +240,37 @@ class IntegrationController extends Controller
             ], 400);
         }
 
-        // Dispatch sync job based on platform
         match ($integration->platform) {
             'github' => dispatch(new \App\Jobs\SyncGitHubData($integration)),
             'gitlab' => dispatch(new \App\Jobs\SyncGitLabData($integration)),
             'bitbucket' => dispatch(new \App\Jobs\SyncBitbucketData($integration)),
-            default => throw new \Exception('Unsupported platform'),
+            default => throw new \Exception('Unsupported platform: ' . $integration->platform),
         };
 
         return response()->json([
             'success' => true,
             'message' => 'Sync started',
         ]);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Resolve authenticated user from: ?token= query param → Bearer header → session.
+     */
+    private function resolveUserFromRequest(Request $request): ?\App\Models\User
+    {
+        // 1. Token in query parameter (for mobile OAuth flow)
+        if ($request->has('token')) {
+            $pat = \Laravel\Sanctum\PersonalAccessToken::findToken($request->get('token'));
+            if ($pat) {
+                return $pat->tokenable;
+            }
+        }
+
+        // 2. Bearer token / session auth
+        return $request->user() ?? auth()->user();
     }
 }
